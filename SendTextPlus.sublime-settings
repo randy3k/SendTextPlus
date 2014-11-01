@@ -1,0 +1,19 @@
+{
+    // "tmux" : "tmux",
+    // "screen" : "screen",
+    "syntax" : [
+        {
+            "scope" : "source.r",
+            "block" : "regexp",
+            "block_trigger" : ".*\\{\\s*$",
+            "regexp" : "^(?:.*(\\{(?:([\"\\'])(?:[^\\\\]|\\\\.)*?\\2|#.*$|[^\\{\\}]|(?1))*\\})[^\\{\\}\\n]*)+",
+            "auto_advance" : true
+        },
+        {
+            "scope" : "source.julia",
+            "block" : "indentation",
+            "block_trigger" : "^\\s*function",
+            "auto_advance" : true
+        }
+    ]
+}
