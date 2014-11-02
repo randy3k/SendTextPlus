@@ -78,16 +78,28 @@ class SendTextPlusCommand(sublime_plugin.TextCommand):
         elif view.score_selector(pt, "source.julia"):
             return "julia"
 
-    def r_expand_sel(self, thiscmd, sel):
+    def r_expand_block(self, sel):
         # expand selection to {...} when being triggered
         view = self.view
-        esel = sel
+        thiscmd = view.substr(view.line(sel))
         if re.match(r".*\{\s*$", thiscmd):
             esel = view.find(r"""^(?:.*(\{(?:(["\'])(?:[^\\]|\\.)*?\2|#.*$|[^\{\}]|(?1))*\})[^\{\}\n]*)+"""
                     , view.line(sel).begin())
             if view.line(sel).begin() == esel.begin():
-                thiscmd = view.substr(esel)
-        return (thiscmd, esel)
+                sel = esel
+        return sel
+
+    def julia_expand_block(self, sel):
+        view = self.view
+        thiscmd = view.substr(view.line(sel))
+        if (re.match(r"^\s*(?:function|if|for|while)", thiscmd) and \
+                not re.match(r".*end\s*$", thiscmd)) or \
+            (re.match(r".*begin\s*$", thiscmd)):
+            indentation = re.match("^(\s*)", thiscmd).group(1)
+            end = view.find("^"+indentation+"end", sel.begin())
+            sel = sublime.Region(sel.begin(), view.line(end.end()).end())
+
+        return sel
 
     def run(self, edit):
         view = self.view
@@ -95,17 +107,19 @@ class SendTextPlusCommand(sublime_plugin.TextCommand):
         cmd = ''
         for sel in [s for s in view.sel()]:
             if sel.empty():
-                thiscmd = view.substr(view.line(sel))
-                line = view.rowcol(sel.end())[0]
-
                 if syntax_settings(syntax, "block", False):
                     if syntax == "r":
-                        (thiscmd, esel) = self.r_expand_sel(thiscmd, sel)
-                        line = view.rowcol(esel.end())[0]
+                        esel = self.r_expand_block(sel)
                     elif syntax == "python":
                         pass
                     elif syntax == "julia":
-                        pass
+                        esel = self.julia_expand_block(sel)
+
+                    thiscmd = view.substr(view.line(esel))
+                    line = view.rowcol(esel.end())[0]
+                else:
+                    thiscmd = view.substr(view.line(sel))
+                    line = view.rowcol(sel.end())[0]
 
                 if syntax_settings(syntax, "auto_advance", False):
                     view.sel().subtract(sel)

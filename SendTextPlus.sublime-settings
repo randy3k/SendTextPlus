@@ -18,6 +18,7 @@
     "julia" :
     {
         // "prog" : "Terminal",
+        "block" : true,
         "auto_advance" : true
     },
 
@@ -25,7 +26,7 @@
     "default":
     {
         "osx" : {
-            "prog" : "iTerm",
+            "prog" : "Terminal",
             "auto_advance" : true
         },
         "linux" : {
