@@ -1,19 +1,40 @@
 {
-    // "tmux" : "tmux",
-    // "screen" : "screen",
-    "syntax" : [
-        {
-            "scope" : "source.r",
-            "block" : "regexp",
-            "block_trigger" : ".*\\{\\s*$",
-            "regexp" : "^(?:.*(\\{(?:([\"\\'])(?:[^\\\\]|\\\\.)*?\\2|#.*$|[^\\{\\}]|(?1))*\\})[^\\{\\}\\n]*)+",
+    // path to tmux and screen (linux/mac)
+    "tmux" : "tmux",
+    "screen" : "screen",
+
+    // syntax settings
+    "r" :
+    {
+        // "prog" : "iTerm",
+        "block" : true,
+        "auto_advance" : true
+    },
+    "python" :
+    {
+        // "prog" : "Terminal",
+        "auto_advance" : true
+    },
+    "julia" :
+    {
+        // "prog" : "Terminal",
+        "auto_advance" : true
+    },
+
+    // default settings
+    "default":
+    {
+        "osx" : {
+            "prog" : "iTerm",
             "auto_advance" : true
         },
-        {
-            "scope" : "source.julia",
-            "block" : "indentation",
-            "block_trigger" : "^\\s*function",
+        "linux" : {
+            "prog" : "tmux",
+            "auto_advance" : true
+        },
+        "windows" : {
+            "prog" : "PowerShell",
             "auto_advance" : true
         }
-    ]
+    }
 }
