@@ -26,7 +26,7 @@
     "default":
     {
         "osx" : {
-            "prog" : "Terminal",
+            "prog" : "Terminal.app",
             "auto_advance" : true
         },
         "linux" : {
