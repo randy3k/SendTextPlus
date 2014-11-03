@@ -97,6 +97,25 @@ class SendTextPlusCommand(sublime_plugin.TextCommand):
                 sel = esel
         return sel
 
+    def python_expand_block(self, sel):
+        view = self.view
+        thiscmd = view.substr(view.line(sel))
+        indentation = re.match(r"^([ \t]*)", thiscmd).group(1)
+        print(len(indentation))
+        row = view.rowcol(sel.begin())[0]
+        lastrow = view.rowcol(view.size())[0]
+        while row < lastrow:
+            row = row +1
+            line = view.line(view.text_point(row, 0))
+            m = re.match(r"^([ \t]*)(?=[^\n\s])", view.substr(line))
+            if m and len(m.group(1)) <= len(indentation):
+                print(m.group(1))
+                sel = sublime.Region(sel.begin(), line.begin()-1)
+                break
+            if row == lastrow:
+                sel = sublime.Region(sel.begin(), view.size())
+        return sel
+
     def julia_expand_block(self, sel):
         view = self.view
         thiscmd = view.substr(view.line(sel))
@@ -119,7 +138,7 @@ class SendTextPlusCommand(sublime_plugin.TextCommand):
                     if syntax == "r":
                         esel = self.r_expand_block(sel)
                     elif syntax == "python":
-                        esel = sel
+                        esel = self.python_expand_block(sel)
                     elif syntax == "julia":
                         esel = self.julia_expand_block(sel)
 
@@ -137,6 +156,17 @@ class SendTextPlusCommand(sublime_plugin.TextCommand):
                 thiscmd = view.substr(sel)
             cmd += thiscmd +'\n'
 
+        # ipython wrapper
+        if syntax == "python" and syntax_settings(syntax, "ipython", False):
+            cmd = clean(cmd)
+            oldcb = sublime.get_clipboard()
+            if len(re.findall("\n", cmd)) > 0:
+                sublime.set_clipboard(cmd)
+                cmd = "%paste"
 
         prog = syntax_settings(syntax, "prog")
         sendtext(prog, cmd)
+
+        # reset clipbooard
+        if syntax == "python" and syntax_settings(syntax, "ipython", False):
+            sublime.set_timeout_async(lambda: sublime.set_clipboard(oldcb), 500)
