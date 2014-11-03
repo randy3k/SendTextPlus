@@ -105,6 +105,7 @@ class SendTextPlusCommand(sublime_plugin.TextCommand):
             row = view.rowcol(sel.begin())[0]
             prevline = view.line(sel.begin())
             lastrow = view.rowcol(view.size())[0]
+            # TODO: handle if elif else, paranethesis
             while row < lastrow:
                 row = row +1
                 line = view.line(view.text_point(row, 0))
@@ -174,3 +175,6 @@ class SendTextPlusCommand(sublime_plugin.TextCommand):
         # reset clipbooard
         if syntax == "python" and syntax_settings(syntax, "ipython", False):
             sublime.set_timeout_async(lambda: sublime.set_clipboard(oldcb), 500)
+
+        if syntax_settings(syntax, "auto_advance", False):
+            view.show(view.sel())
