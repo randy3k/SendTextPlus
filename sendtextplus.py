@@ -100,20 +100,24 @@ class SendTextPlusCommand(sublime_plugin.TextCommand):
     def python_expand_block(self, sel):
         view = self.view
         thiscmd = view.substr(view.line(sel))
-        indentation = re.match(r"^([ \t]*)", thiscmd).group(1)
-        print(len(indentation))
-        row = view.rowcol(sel.begin())[0]
-        lastrow = view.rowcol(view.size())[0]
-        while row < lastrow:
-            row = row +1
-            line = view.line(view.text_point(row, 0))
-            m = re.match(r"^([ \t]*)(?=[^\n\s])", view.substr(line))
-            if m and len(m.group(1)) <= len(indentation):
-                print(m.group(1))
-                sel = sublime.Region(sel.begin(), line.begin()-1)
-                break
+        if re.match(r"^[ \t]*\S", thiscmd):
+            indentation = re.match(r"^([ \t]*)", thiscmd).group(1)
+            row = view.rowcol(sel.begin())[0]
+            prevline = view.line(sel.begin())
+            lastrow = view.rowcol(view.size())[0]
+            while row < lastrow:
+                row = row +1
+                line = view.line(view.text_point(row, 0))
+                m = re.match(r"^([ \t]*)(?=[^\n\s])", view.substr(line))
+                if m and len(m.group(1)) <= len(indentation):
+                    sel = sublime.Region(sel.begin(), prevline.end())
+                    break
+                elif re.match(r"^[ \t]*\S", view.substr(line)):
+                    prevline = line
+
             if row == lastrow:
-                sel = sublime.Region(sel.begin(), view.size())
+                sel = sublime.Region(sel.begin(), prevline.end())
+
         return sel
 
     def julia_expand_block(self, sel):
