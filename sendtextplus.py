@@ -37,7 +37,6 @@ def escape_dq(cmd):
 def sendtext(prog, cmd):
     plat = sublime.platform()
     settings = sublime.load_settings("SendTextPlus.sublime-settings")
-    print(prog)
 
     if prog == 'Terminal.app':
         cmd = clean(cmd)
