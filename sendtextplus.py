@@ -59,7 +59,7 @@ def sendtext(prog, cmd):
 
     elif prog == "tmux":
         progpath = settings.get("tmux", "tmux")
-        subprocess.call([progpath, 'set-buffer', cmd + "\n"])
+        subprocess.call([progpath, 'set-buffer', cmd])
         subprocess.call([progpath, 'paste-buffer', '-d'])
 
     elif prog == "screen":
