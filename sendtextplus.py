@@ -178,3 +178,31 @@ class SendTextPlusCommand(sublime_plugin.TextCommand):
 
         if syntax_settings(syntax, "auto_advance", False):
             view.show(view.sel())
+
+
+class ChangeDirCommand(sublime_plugin.TextCommand):
+    def get_syntax(self):
+        view = self.view
+        pt = view.sel()[0].begin() if len(view.sel())>0 else 0
+        if view.score_selector(pt, "source.r"):
+            return "r"
+        elif view.score_selector(pt, "source.python"):
+            return "python"
+        elif view.score_selector(pt, "source.julia"):
+            return "julia"
+
+    def run(self, edit):
+        fname = self.view.file_name()
+        if not fname:
+            sublime.error_message("Save the file!")
+            return
+
+        dirname = os.path.dirname(fname)
+        syntax = self.get_syntax()
+        prog = syntax_settings(syntax, "prog")
+
+        if syntax == "r":
+            cmd = "setwd(\"" + escape_dq(dirname) + "\")"
+        elif syntax == "julia":
+            cmd = "cd(\"" + escape_dq(dirname) + "\")"
+        sendtext(prog, cmd + "\n")
