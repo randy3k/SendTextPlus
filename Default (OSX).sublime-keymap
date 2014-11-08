@@ -1,3 +1,4 @@
 [
-    { "keys": ["super+enter"], "command": "send_text_plus" }
+    { "keys": ["super+enter"], "command": "send_text_plus" },
+    { "keys": ["super+\\"], "command": "send_text_plus_change_dir" }    
 ]

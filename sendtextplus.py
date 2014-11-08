@@ -180,7 +180,7 @@ class SendTextPlusCommand(sublime_plugin.TextCommand):
             view.show(view.sel())
 
 
-class ChangeDirCommand(sublime_plugin.TextCommand):
+class SendTextPlusChangeDirCommand(sublime_plugin.TextCommand):
     def get_syntax(self):
         view = self.view
         pt = view.sel()[0].begin() if len(view.sel())>0 else 0
@@ -205,4 +205,6 @@ class ChangeDirCommand(sublime_plugin.TextCommand):
             cmd = "setwd(\"" + escape_dq(dirname) + "\")"
         elif syntax == "julia":
             cmd = "cd(\"" + escape_dq(dirname) + "\")"
+        elif syntax == "python" and syntax_settings(syntax, "ipython", False):
+            cmd = "cd \"" + escape_dq(dirname) + "\""
         sendtext(prog, cmd + "\n")
