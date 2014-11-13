@@ -53,9 +53,14 @@ def sendtext(prog, cmd):
         # when cmd ends in a space, iterm does not execute. Thus append a line break.
         if (cmd[-1:] == ' '):
             cmd += '\n'
-        args = ['osascript']
-        args.extend(['-e', 'tell app "iTerm" to tell the first terminal to tell current session to write text "' + cmd +'"'])
-        subprocess.Popen(args)
+        try:
+            # iterm <2.9
+            args = ['osascript', '-e', 'tell app "iTerm" to tell the first terminal to tell current session to write text "' + cmd +'"']
+            subprocess.check_call(args)
+        except:
+            # iterm >=2.9
+            args = ['osascript', '-e', 'tell app "iTerm" to tell the first terminal window to tell current session to write text "' + cmd +'"']
+            subprocess.check_call(args)
 
     elif prog == "tmux":
         progpath = settings.get("tmux", "tmux")
