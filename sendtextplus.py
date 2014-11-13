@@ -63,6 +63,7 @@ def sendtext(prog, cmd):
             subprocess.check_call(args)
 
     elif prog == "tmux":
+        cmd = clean(cmd) + "\n"
         progpath = settings.get("tmux", "tmux")
         # `tmux set-buffer` fails if more than 16352 characters are
         # passed to it. Send in chunks to avoid the problem.
@@ -73,6 +74,7 @@ def sendtext(prog, cmd):
             subprocess.call([progpath, 'paste-buffer', '-d'])
 
     elif prog == "screen":
+        cmd = clean(cmd) + "\n"
         progpath = settings.get("screen", "screen")
         if len(cmd)<2000:
             subprocess.call([progpath, '-X', 'stuff', cmd])
