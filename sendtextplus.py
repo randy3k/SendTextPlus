@@ -115,7 +115,7 @@ class SendTextPlusCommand(sublime_plugin.TextCommand):
                 line = view.line(view.text_point(row, 0))
                 m = re.match(r"^([ \t]*)([^\n\s]+)", view.substr(line))
                 if m and len(m.group(1)) <= len(indentation) and \
-                        not re.match(r"else|elif|except|finally", m.group(2)):
+                        (len(m.group(1)) < len(indentation) or not re.match(r"else|elif|except|finally", m.group(2))):
                     sel = sublime.Region(sel.begin(), prevline.end())
                     break
                 elif re.match(r"^[ \t]*\S", view.substr(line)):
