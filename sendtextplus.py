@@ -176,10 +176,8 @@ class SendTextPlusCommand(sublime_plugin.TextCommand):
         # ipython wrapper
         if syntax == "python" and syntax_settings(syntax, "ipython", False):
             cmd = clean(cmd)
-            oldcb = sublime.get_clipboard()
             if len(re.findall("\n", cmd)) > 0:
-                sublime.set_clipboard(cmd)
-                cmd = "%paste"
+                cmd = "%cpaste\n" + cmd + "\n--"
 
         prog = syntax_settings(syntax, "prog")
         sendtext(prog, cmd)
