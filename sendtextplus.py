@@ -59,13 +59,13 @@ def sendtext(prog, cmd):
             cmd += '\n'
         try:
             # iterm <2.9
-            args = ['osascript', '-e', 'tell app "iTerm" to tell the first terminal " \
-                    "to tell current session to write text "' + cmd + '"']
+            args = ['osascript', '-e', 'tell app "iTerm" to tell the first terminal '
+                    'to tell current session to write text "' + cmd + '"']
             subprocess.check_call(args)
         except:
             # iterm >=2.9
-            args = ['osascript', '-e', 'tell app "iTerm" to tell the first terminal window " \
-                    "to tell current session to write text "' + cmd + '"']
+            args = ['osascript', '-e', 'tell app "iTerm" to tell the first terminal window '
+                    'to tell current session to write text "' + cmd + '"']
             subprocess.check_call(args)
 
     elif prog == "tmux":
