@@ -15,11 +15,11 @@ def syntax_settings(lang, key, default=None):
         os_settings = lang_settings.get(plat)
         if os_settings:
             ret = os_settings.get(key)
-        if not ret:
+        if ret is None:
             ret = lang_settings.get(key)
-    if not ret:
+    if ret is None:
         ret = settings.get("default").get(plat).get(key)
-    if not ret:
+    if ret is None:
         ret = default
     return ret
 
@@ -90,6 +90,13 @@ def sendtext(prog, cmd):
                     f.write(cmd)
                     subprocess.call([progpath, '-X', 'stuff', ". %s\n" % (f.name)])
 
+    elif prog == "SublimeREPL":
+        cmd = clean(cmd)
+        view = sublime.active_window().active_view()
+        external_id = view.scope_name(0).split(" ")[0].split(".", 1)[1]
+        sublime.active_window().run_command("repl_send", {"external_id": external_id, "text": cmd})
+        return
+
     if plat == 'windows':
         raise Exception("not yet supported")
 
@@ -140,7 +147,6 @@ class SendTextPlusCommand(sublime_plugin.TextCommand):
 
             if row == lastrow:
                 sel = sublime.Region(sel.begin(), prevline.end())
-
         return sel
 
     def julia_expand_block(self, sel):
@@ -191,10 +197,6 @@ class SendTextPlusCommand(sublime_plugin.TextCommand):
 
         prog = syntax_settings(syntax, "prog")
         sendtext(prog, cmd)
-
-        # reset clipbooard
-        if syntax == "python" and syntax_settings(syntax, "ipython", False):
-            sublime.set_timeout_async(lambda: sublime.set_clipboard(oldcb), 500)
 
         if syntax_settings(syntax, "auto_advance", False):
             view.show(view.sel())
