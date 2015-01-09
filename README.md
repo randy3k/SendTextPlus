@@ -5,7 +5,8 @@ This package improves [SendText](https://github.com/wch/SendText), particularly 
 
  - Terminal of Mac
  - iTerm 2 of Mac 
- - screen and tmux on Unix machines.
+ - screen and tmux on Unix machines
+ - SublimeREPL for R and python syntaxes (it works better with R)
 
 ### Installation
 
@@ -24,8 +25,6 @@ Terminal is the default for Mac and tmux is the default for Linux. To configure 
 
 ### Some Details
 
-For `r`, a block is defined via a fancy regular expression which essentially
-detects `{`,`}` pairs. For `julia`, a block is defined by indented code with
-respectively to `xxx`, `end` pairs. For `python`, blocks are detected via
-indentations, but it is assumed that ipython is used. If you are not using
-ipython, get one!
+- For `r`, blocks are detected by a regular expression for  `{`,`}` pairs. 
+- For `julia`, blocks are defined by `begin`, `end` pairs and indentations. 
+- For `python`, blocks are detected by indentations, and it is assumed that ipython is used.
