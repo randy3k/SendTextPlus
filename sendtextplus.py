@@ -83,6 +83,8 @@ def sendtext(prog, cmd):
         cmd = clean(cmd) + "\n"
         progpath = settings.get("screen", "screen")
         if len(cmd) < 2000:
+            if plat == "linux":
+                cmd = cmd.replace("$", r"\$")
             subprocess.call([progpath, '-X', 'stuff', cmd])
         else:
             with tempfile.NamedTemporaryFile() as tmp:
