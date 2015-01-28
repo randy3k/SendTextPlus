@@ -3,7 +3,6 @@ import sublime_plugin
 import os
 import subprocess
 import re
-import tempfile
 
 
 def syntax_settings(lang, key, default=None):
