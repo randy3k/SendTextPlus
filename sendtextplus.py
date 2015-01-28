@@ -56,16 +56,25 @@ def sendtext(prog, cmd):
         # when cmd ends in a space, iterm does not execute. Thus append a line break.
         if (cmd[-1:] == ' '):
             cmd += '\n'
-        try:
-            # iterm <2.9
-            args = ['osascript', '-e', 'tell app "iTerm" to tell the first terminal '
-                    'to tell current session to write text "' + cmd + '"']
-            subprocess.check_call(args)
-        except:
-            # iterm >=2.9
-            args = ['osascript', '-e', 'tell app "iTerm" to tell the first terminal window '
-                    'to tell current session to write text "' + cmd + '"']
-            subprocess.check_call(args)
+        cmd = cmd.split("\n")
+        line_len = [len(c) for c in cmd]
+        k = 0
+        while k < len(line_len):
+            for j in range(k + 1, len(line_len) + 1):
+                if sum(line_len[k:j]) > 500:
+                    break
+            chunk = "\n".join(cmd[k:j])
+            try:
+                # iterm <2.9
+                args = ['osascript', '-e', 'tell app "iTerm" to tell the first terminal '
+                        'to tell current session to write text "' + chunk + '"']
+                subprocess.check_call(args)
+            except:
+                # iterm >=2.9
+                args = ['osascript', '-e', 'tell app "iTerm" to tell the first terminal window '
+                        'to tell current session to write text "' + chunk + '"']
+                subprocess.check_call(args)
+            k = j
 
     elif prog == "tmux":
         cmd = clean(cmd) + "\n"
@@ -162,6 +171,7 @@ class SendTextPlusCommand(sublime_plugin.TextCommand):
         view = self.view
         syntax = self.get_syntax()
         cmd = ''
+        moved = False
         for sel in [s for s in view.sel()]:
             if sel.empty():
                 if syntax_settings(syntax, "block", False):
@@ -182,6 +192,7 @@ class SendTextPlusCommand(sublime_plugin.TextCommand):
                     view.sel().subtract(sel)
                     pt = view.text_point(line+1, 0)
                     view.sel().add(sublime.Region(pt, pt))
+                    moved = True
             else:
                 thiscmd = view.substr(sel)
             cmd += thiscmd + '\n'
@@ -195,7 +206,7 @@ class SendTextPlusCommand(sublime_plugin.TextCommand):
         prog = syntax_settings(syntax, "prog")
         sendtext(prog, cmd)
 
-        if syntax_settings(syntax, "auto_advance", False):
+        if moved:
             view.show(view.sel())
 
 
