@@ -70,7 +70,7 @@ def sendtext(prog, cmd):
 
     elif prog == "tmux":
         cmd = clean(cmd) + "\n"
-        progpath = RBoxSettings("tmux", "tmux")
+        progpath = settings.get("tmux", "tmux")
         n = 200
         chunks = [cmd[i:i+n] for i in range(0, len(cmd), n)]
         for chunk in chunks:
@@ -79,7 +79,7 @@ def sendtext(prog, cmd):
 
     elif prog == "screen":
         cmd = clean(cmd) + "\n"
-        progpath = RBoxSettings("screen", "screen")
+        progpath = settings.get("screen", "screen")
         n = 200
         chunks = [cmd[i:i+n] for i in range(0, len(cmd), n)]
         for chunk in chunks:
