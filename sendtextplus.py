@@ -76,7 +76,7 @@ def sendtext(view, cmd):
         cmd = clean(cmd)
         cmd = escape_dq(cmd)
         cmd = cmd.split("\n")
-        line_len = [len(c) for c in cmd]
+        line_len = [len(c)+1 for c in cmd]
         k = 0
         ver = iTerm_version()
         while k < len(line_len):
