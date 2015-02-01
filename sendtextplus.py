@@ -2,7 +2,8 @@ import sublime
 import sublime_plugin
 import os
 import re
-from .misc import clean, escape_dq, get_syntax, syntax_settings, expand_block
+from .misc import clean, escape_dq, get_syntax, syntax_settings
+from .expand import expand_block
 from .send import sendtext
 
 
