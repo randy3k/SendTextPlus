@@ -69,15 +69,12 @@ def sendtext(view, cmd):
         cmd = clean(cmd)
         cmd = escape_dq(cmd)
         args = ['osascript']
-        args.extend(['-e', 'tell app "Terminal" to do script "' + cmd + '" in front window\n'])
+        args.extend(['-e', 'tell app "Terminal" to do script "' + cmd + '" in front window'])
         subprocess.Popen(args)
 
     elif re.match('iTerm', prog):
         cmd = clean(cmd)
         cmd = escape_dq(cmd)
-        # when cmd ends in a space, iterm does not execute. Thus append a line break.
-        if (cmd[-1:] == ' '):
-            cmd += '\n'
         cmd = cmd.split("\n")
         line_len = [len(c) for c in cmd]
         k = 0
@@ -95,6 +92,17 @@ def sendtext(view, cmd):
                         'to tell current session to write text "' + chunk + '"']
 
             subprocess.check_call(args)
+
+            # when cmd ends in a space, iterm does not execute.
+            if (chunk[-1:] == ' '):
+                if ver == 2.0:
+                    args = ['osascript', '-e', 'tell app "iTerm" to tell the first terminal '
+                            'to tell current session to write text ""']
+                else:
+                    args = ['osascript', '-e', 'tell app "iTerm" to tell the first terminal window '
+                            'to tell current session to write text ""']
+                subprocess.check_call(args)
+
             k = j
 
     elif prog == "tmux":
