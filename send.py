@@ -28,7 +28,6 @@ def sendtext_iterm(cmd):
     line_len = [len(c)+1 for c in cmd]
     k = 0
     ver = iterm_version()
-    print(ver)
     while k < len(line_len):
         for j in range(k + 1, len(line_len) + 1):
             if sum(line_len[k:(j+1)]) > 1000:
