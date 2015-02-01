@@ -13,7 +13,6 @@
     "python" :
     {
         // "prog" : "Terminal",
-        "ipython" : true,
         "block" : true,
         "auto_advance" : true
     },
