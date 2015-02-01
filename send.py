@@ -96,9 +96,8 @@ def sendtext(view, cmd):
 
     elif prog == "SublimeREPL":
         cmd = clean(cmd)
-        view = sublime.active_window().active_view()
         external_id = view.scope_name(0).split(" ")[0].split(".", 1)[1]
-        sublime.active_window().run_command("repl_send", {"external_id": external_id, "text": cmd})
+        view.window().run_command("repl_send", {"external_id": external_id, "text": cmd})
         return
 
     if plat == 'windows':
