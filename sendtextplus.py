@@ -1,10 +1,7 @@
 import sublime
 import sublime_plugin
 import os
-import re
-from .misc import clean, escape_dq, get_syntax, syntax_settings
-from .expand import expand_block
-from .send import sendtext
+from .sendtext import sendtext, expand_block, escape_dq, get_syntax, syntax_settings
 
 
 class SendTextPlusCommand(sublime_plugin.TextCommand):
@@ -26,12 +23,6 @@ class SendTextPlusCommand(sublime_plugin.TextCommand):
             else:
                 thiscmd = view.substr(sel)
             cmd += thiscmd + '\n'
-
-        # ipython wrapper
-        if get_syntax(view) == "python":
-            cmd = clean(cmd)
-            if len(re.findall("\n", cmd)) > 0:
-                cmd = "%cpaste\n" + cmd + "\n--"
 
         sendtext(view, cmd)
 
