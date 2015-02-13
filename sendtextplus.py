@@ -11,6 +11,7 @@ class SendTextPlusCommand(sublime_plugin.TextCommand):
         moved = False
         for sel in [s for s in view.sel()]:
             if sel.empty():
+                esel = sel
                 if syntax_settings(view, "block", False):
                     esel = expand_block(view, sel)
                 thiscmd = view.substr(view.line(esel))
