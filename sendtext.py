@@ -77,10 +77,10 @@ def sendtext_iterm(cmd):
                 break
         chunk = "\n".join(cmd[k:j])
         if ver == 2.0:
-            args = ['osascript', '-e', 'tell app "iTerm" to tell the first terminal ' + 
+            args = ['osascript', '-e', 'tell app "iTerm" to tell the first terminal ' +
                     'to tell current session to write text "' + chunk + '"']
         else:
-            args = ['osascript', '-e', 'tell app "iTerm" to tell the first terminal window ' + 
+            args = ['osascript', '-e', 'tell app "iTerm" to tell the first terminal window ' +
                     'to tell current session to write text "' + chunk + '"']
 
         # when chunk ends in a space, iterm does not execute.
