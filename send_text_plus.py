@@ -2,8 +2,8 @@ import sublime
 import sublime_plugin
 import os
 import re
-from .sendtext import clean, escape_dq
-from .sendtext import sendtext_terminal, sendtext_iterm, sendtext_tmux, sendtext_screen
+from .send_text import clean, escape_dq
+from .send_text import send_text_terminal, send_text_iterm, send_text_tmux, send_text_screen
 
 
 def get_syntax(view):
@@ -35,7 +35,7 @@ def syntax_settings(view, key, default=None):
     return ret
 
 
-def sendtext(view, cmd):
+def send_text(view, cmd):
     if cmd.strip() == "":
         return
     plat = sublime.platform()
@@ -49,16 +49,16 @@ def sendtext(view, cmd):
             cmd = "%cpaste\n" + cmd + "\n--"
 
     if prog == 'Terminal':
-        sendtext_terminal(cmd)
+        send_text_terminal(cmd)
 
     elif prog == 'iTerm':
-        sendtext_iterm(cmd)
+        send_text_iterm(cmd)
 
     elif prog == "tmux":
-        sendtext_tmux(cmd, settings.get("tmux", "tmux"))
+        send_text_tmux(cmd, settings.get("tmux", "tmux"))
 
     elif prog == "screen":
-        sendtext_screen(cmd, settings.get("screen", "screen"))
+        send_text_screen(cmd, settings.get("screen", "screen"))
 
     elif prog == "SublimeREPL":
         cmd = clean(cmd)
@@ -151,7 +151,7 @@ class SendTextPlusCommand(sublime_plugin.TextCommand):
                 thiscmd = view.substr(sel)
             cmd += thiscmd + '\n'
 
-        sendtext(view, cmd)
+        send_text(view, cmd)
 
         if moved:
             view.show(view.sel())
@@ -174,4 +174,4 @@ class SendTextPlusChangeDirCommand(sublime_plugin.TextCommand):
             cmd = "cd(\"" + escape_dq(dirname) + "\")"
         elif syntax == "python":
             cmd = "cd \"" + escape_dq(dirname) + "\""
-        sendtext(view, cmd + "\n")
+        send_text(view, cmd + "\n")

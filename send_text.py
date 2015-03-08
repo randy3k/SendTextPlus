@@ -17,7 +17,7 @@ def escape_dq(cmd):
     return cmd
 
 
-def sendtext_terminal(cmd):
+def send_text_terminal(cmd):
     cmd = clean(cmd)
     cmd = escape_dq(cmd)
     args = ['osascript']
@@ -35,7 +35,7 @@ def iterm_version():
         return 2.9
 
 
-def sendtext_iterm(cmd):
+def send_text_iterm(cmd):
     cmd = clean(cmd)
     cmd = escape_dq(cmd)
     ver = iterm_version()
@@ -48,7 +48,7 @@ def sendtext_iterm(cmd):
     subprocess.check_call(args)
 
 
-def sendtext_tmux(cmd, tmux="tmux"):
+def send_text_tmux(cmd, tmux="tmux"):
     cmd = clean(cmd) + "\n"
     n = 200
     chunks = [cmd[i:i+n] for i in range(0, len(cmd), n)]
@@ -57,7 +57,7 @@ def sendtext_tmux(cmd, tmux="tmux"):
         subprocess.call([tmux, 'paste-buffer', '-d'])
 
 
-def sendtext_screen(cmd, screen="screen"):
+def send_text_screen(cmd, screen="screen"):
     plat = sys.platform
     cmd = clean(cmd) + "\n"
     n = 200

@@ -13,7 +13,7 @@ This package improves [SendText](https://github.com/wch/SendText), particularly 
 Via Package Control.
 
 ### Demo
-![](https://raw.githubusercontent.com/randy3k/SendTextPlus/master/sendtextplus.gif)
+![](https://raw.githubusercontent.com/randy3k/SendTextPlus/master/send_text_plus.gif)
 
 ### Usage
 
