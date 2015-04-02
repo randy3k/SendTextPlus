@@ -17,15 +17,21 @@ Via Package Control.
 
 ### Usage
 
-`cmd+enter` (Mac) or `ctrl+enter` (Windows/Linux)
+- `cmd+enter` (Mac) or `ctrl+enter` (Windows/Linux)
 
 If text is selected, it sends the text to the program selected. If no text is selected, then it sends the current block (if found). Finally, it moves the cursor to the next line.
 
 Terminal is the default for Mac and tmux is the default for Linux. To configure the settings, open Preferences -> Package Settings -> SendTextPlus -> Settings.
 
-[r, python, julia only] `cmd+\` (Mac) or `ctrl+\` (Windows/Linux): change working directory
+Belows are only for `r`, `python` and `julia`.
 
-[r, python, julia only] `cmd+b` (Mac) or `ctrl+b` (Windows/Linux): source current file
+- `cmd+\` (Mac) or `ctrl+\` (Windows/Linux): change working directory
+
+
+- `cmd+b` (Mac) or `ctrl+b` (Windows/Linux): source current file
+
+SendTextPlus uses Sublime build system to source files, you might have to choose the `SendTextPlus` build system before pressing the keys.
+
 
 ### Some Details
 
