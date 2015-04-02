@@ -316,3 +316,9 @@ class SendTextPlusSourceCodeCommand(sublime_plugin.TextCommand,
             return
 
         self.send_text(cmd + "\n")
+
+
+class SendTextPlusBuildCommand(sublime_plugin.WindowCommand):
+
+    def run(self):
+        self.window.active_view().run_command("send_text_plus_source_code")

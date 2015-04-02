@@ -14,17 +14,5 @@
     {
         "keys": ["ctrl+\\"], "command": "send_text_plus_change_dir",
         "context": [{"key": "selector", "operator": "equal", "operand": "source.julia"}]
-    },
-    {
-        "keys": ["ctrl+b"], "command": "send_text_plus_source_code",
-        "context": [{"key": "selector", "operator": "equal", "operand": "source.r"}]
-    },
-    {
-        "keys": ["ctrl+b"], "command": "send_text_plus_source_code",
-        "context": [{"key": "selector", "operator": "equal", "operand": "source.python"}]
-    },
-    {
-        "keys": ["ctrl+b"], "command": "send_text_plus_source_code",
-        "context": [{"key": "selector", "operator": "equal", "operand": "source.julia"}]
     }
 ]
