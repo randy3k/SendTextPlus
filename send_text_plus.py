@@ -49,7 +49,7 @@ class SyntaxMixins:
         return SyntaxSettings(syntax)
 
 
-class SencTextMixins:
+class SendTextMixins:
 
     @staticmethod
     def clean(cmd):
@@ -237,7 +237,7 @@ class ExpandBlockMixins:
 
 class SendTextPlusCommand(sublime_plugin.TextCommand,
                           SyntaxMixins,
-                          SencTextMixins,
+                          SendTextMixins,
                           ExpandBlockMixins):
     def run(self, edit):
         view = self.view
@@ -271,7 +271,7 @@ class SendTextPlusCommand(sublime_plugin.TextCommand,
 
 class SendTextPlusChangeDirCommand(sublime_plugin.TextCommand,
                                    SyntaxMixins,
-                                   SencTextMixins):
+                                   SendTextMixins):
     def run(self, edit):
         view = self.view
         fname = view.file_name()
@@ -296,7 +296,7 @@ class SendTextPlusChangeDirCommand(sublime_plugin.TextCommand,
 
 class SendTextPlusSourceCodeCommand(sublime_plugin.TextCommand,
                                     SyntaxMixins,
-                                    SencTextMixins):
+                                    SendTextMixins):
     def run(self, edit):
         view = self.view
         fname = view.file_name()
