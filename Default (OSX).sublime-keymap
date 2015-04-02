@@ -1,4 +1,30 @@
 [
-    { "keys": ["super+enter"], "command": "send_text_plus" },
-    { "keys": ["super+\\"], "command": "send_text_plus_change_dir" }    
+    {
+        "keys": ["super+enter"],
+        "command": "send_text_plus"
+    },
+    {
+        "keys": ["super+\\"], "command": "send_text_plus_change_dir",
+        "context": [{"key": "selector", "operator": "equal", "operand": "source.r"}]
+    },
+    {
+        "keys": ["super+\\"], "command": "send_text_plus_change_dir",
+        "context": [{"key": "selector", "operator": "equal", "operand": "source.python"}]
+    },
+    {
+        "keys": ["super+\\"], "command": "send_text_plus_change_dir",
+        "context": [{"key": "selector", "operator": "equal", "operand": "source.julia"}]
+    },
+    {
+        "keys": ["super+b"], "command": "send_text_plus_source_code",
+        "context": [{"key": "selector", "operator": "equal", "operand": "source.r"}]
+    },
+    {
+        "keys": ["super+b"], "command": "send_text_plus_source_code",
+        "context": [{"key": "selector", "operator": "equal", "operand": "source.python"}]
+    },
+    {
+        "keys": ["super+b"], "command": "send_text_plus_source_code",
+        "context": [{"key": "selector", "operator": "equal", "operand": "source.julia"}]
+    }
 ]

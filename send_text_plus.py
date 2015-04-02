@@ -292,3 +292,27 @@ class SendTextPlusChangeDirCommand(sublime_plugin.TextCommand,
             return
 
         self.send_text(cmd + "\n")
+
+
+class SendTextPlusSourceCodeCommand(sublime_plugin.TextCommand,
+                                    SyntaxMixins,
+                                    SencTextMixins):
+    def run(self, edit):
+        view = self.view
+        fname = view.file_name()
+        if not fname:
+            sublime.error_message("Save the file!")
+            return
+
+        syntax = self.get_syntax()
+
+        if syntax == "r":
+            cmd = "source(\"" + self.escape_dq(fname) + "\")"
+        elif syntax == "julia":
+            cmd = "include(\"" + self.escape_dq(fname) + "\")"
+        elif syntax == "python":
+            cmd = "%run \"" + self.escape_dq(fname) + "\""
+        else:
+            return
+
+        self.send_text(cmd + "\n")
