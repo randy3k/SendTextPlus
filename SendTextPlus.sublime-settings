@@ -4,39 +4,33 @@
     "screen" : "screen",
 
     // syntax settings
-    "r" :
-    {
-        // "prog" : "iTerm",
-        "block" : true,
-        "auto_advance" : true
-    },
-    "python" :
-    {
-        // "prog" : "Terminal",
-        "block" : true,
-        "auto_advance" : true
-    },
-    "julia" :
-    {
-        // "prog" : "Terminal",
-        "block" : true,
-        "auto_advance" : true
-    },
+    // "r" : {
+    //     "auto_advance" : true,
+    //     "osx" : {
+    //         "prog" : "Terminal"
+    //     },
+    //     "linux" : {
+    //         "prog" : "tmux"
+    //     },
+    //     "windows" : {
+    //         "prog" : "Cmder"
+    //     }
+    // },
+    // "python" : {},
+    // "julia" : {},
 
     // default settings
     "default":
     {
+        "auto_advance" : true,
         "osx" : {
-            "prog" : "Terminal",
-            "auto_advance" : true
+            "prog" : "Terminal"
         },
         "linux" : {
-            "prog" : "tmux",
-            "auto_advance" : true
+            "prog" : "tmux"
         },
         "windows" : {
-            "prog" : "PowerShell",
-            "auto_advance" : true
+            "prog" : "Cmder"
         }
     }
 }
