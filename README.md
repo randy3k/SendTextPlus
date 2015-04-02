@@ -23,6 +23,10 @@ If text is selected, it sends the text to the program selected. If no text is se
 
 Terminal is the default for Mac and tmux is the default for Linux. To configure the settings, open Preferences -> Package Settings -> SendTextPlus -> Settings.
 
+[r, python, julia only] `cmd+\` (Mac) or `ctrl+\` (Windows/Linux): change working directory
+
+[r, python, julia only] `cmd+b` (Mac) or `ctrl+b` (Windows/Linux): source current file
+
 ### Some Details
 
 - For `r`, blocks are detected by a regular expression for  `{`,`}` pairs. 
