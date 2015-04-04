@@ -232,6 +232,8 @@ class ExpandBlockMixin:
             esel = self._expand_block_python(sel)
         elif syntax == "julia":
             esel = self._expand_block_julia(sel)
+        else:
+            esel = sel
         return esel
 
 
