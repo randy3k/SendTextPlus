@@ -113,15 +113,15 @@ class SendTextMixin:
                 chunk = chunk.replace("$", r"\$")
             subprocess.call([screen, '-X', 'stuff', chunk])
 
-    # def _send_text_ahk(self, cmd, progpath="", script="Rgui.ahk"):
-    #     cmd = self.clean_cmd(cmd)
-    #     ahk_path = os.path.join(sublime.packages_path(), 'User', 'R-Box', 'bin', 'AutoHotkeyU32')
-    #     ahk_script_path = os.path.join(sublime.packages_path(), 'User', 'R-Box', 'bin', script)
-    #     # manually add "\n" to keep the indentation of first line of block code,
-    #     # "\n" is later removed in AutoHotkey script
-    #     cmd = "\n" + cmd
-    #     args = [ahk_path, ahk_script_path, progpath, cmd]
-    #     subprocess.Popen(args)
+    def _send_text_ahk(self, cmd, progpath="", script="Rgui.ahk"):
+        cmd = self.clean_cmd(cmd)
+        ahk_path = os.path.join(sublime.packages_path(), 'User', 'SendTextPlus', 'bin', 'AutoHotkeyU32')
+        ahk_script_path = os.path.join(sublime.packages_path(), 'User', 'SendTextPlus', 'bin', script)
+        # manually add "\n" to keep the indentation of first line of block code,
+        # "\n" is later removed in AutoHotkey script
+        cmd = "\n" + cmd
+        args = [ahk_path, ahk_script_path, progpath, cmd]
+        subprocess.Popen(args)
 
     def send_text(self, cmd):
         view = self.view
@@ -166,11 +166,11 @@ class SendTextMixin:
         #     progpath = settings.get(prog, "1" if prog == "R64" else "0")
         #     self._send_text_ahk(cmd, progpath, "Rgui.ahk")
 
-        # elif prog == "Cygwin":
-        #     self._send_text_ahk(cmd, "", "Cygwin.ahk")
+        elif prog == "Cygwin":
+            self._send_text_ahk(cmd, "", "Cygwin.ahk")
 
-        # elif prog == "Cmder":
-        #     self._send_text_ahk(cmd, "", "Cmder.ahk")
+        elif prog == "Cmder":
+            self._send_text_ahk(cmd, "", "Cmder.ahk")
 
 
 class ExpandBlockMixin:

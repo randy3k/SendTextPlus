@@ -6,6 +6,7 @@ This package improves [SendText](https://github.com/wch/SendText), particularly 
  - Terminal of Mac
  - iTerm 2 of Mac 
  - screen and tmux on Unix machines
+ - [Cmder]((http://bliker.github.io/cmder/)) and Cygwin on Windows (see below to configure Cmder)
  - SublimeREPL for R and python syntaxes (it works better with R)
 
 ### Installation
@@ -31,6 +32,14 @@ Belows are only for `r`, `python` and `julia`.
 - `cmd+b` (Mac) or `ctrl+b` (Windows/Linux): source current file
 
 SendTextPlus uses Sublime build system to source files, you might have to choose the `SendTextPlus` build system before pressing the keys.
+
+### Cmder settings
+
+There are two things that you need to do:
+
+1. Due to this [bug!?](http://www.autohotkey.com/board/topic/92360-controlsend-messes-up-modifiers/), you have to change the paste shortcut of Cmder from `shift+insert` to `ctrl+shift+v` in Cmder settings.
+
+2. Go to `Paste` in the settings, uncheck, "Confirm <enter> keypress" and "Confirm pasting more than..."
 
 
 ### Some Details
