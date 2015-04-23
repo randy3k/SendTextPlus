@@ -6,7 +6,7 @@ This package improves [SendText](https://github.com/wch/SendText), particularly 
  - Terminal of Mac
  - iTerm 2 of Mac 
  - screen and tmux on Unix machines
- - [Cmder]((http://bliker.github.io/cmder/)) and Cygwin on Windows (see below to configure Cmder)
+ - [Cmder](http://bliker.github.io/cmder) and Cygwin on Windows (see below to configure Cmder)
  - SublimeREPL for R and python syntaxes (it works better with R)
 
 ### Installation
