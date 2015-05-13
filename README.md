@@ -18,7 +18,7 @@ Via Package Control.
 
 ### Usage
 
-- `cmd+enter` (Mac) or `ctrl+enter` (Windows/Linux)
+- <kbd>cmd</kbd>+<kbd>enter</kbd> (Mac) or <kbd>ctrl</kbd>+<kbd>enter</kbd> (Windows/Linux)
 
 If text is selected, it sends the text to the program selected. If no text is selected, then it sends the current block (if found). Finally, it moves the cursor to the next line.
 
@@ -26,10 +26,10 @@ Terminal is the default for Mac and tmux is the default for Linux. To configure 
 
 Belows are only for `r`, `python` and `julia`.
 
-- `cmd+\` (Mac) or `ctrl+\` (Windows/Linux): change working directory
+- <kbd>cmd</kbd>+<kbd>\\</kbd> (Mac) or <kbd>ctrl</kbd>+<kbd>\\</kbd> (Windows/Linux): change working directory
 
 
-- `cmd+b` (Mac) or `ctrl+b` (Windows/Linux): source current file
+- <kbd>cmd</kbd>+<kbd>b</kbd> (Mac) or <kbd>ctrl</kbd>+<kbd>b</kbd> (Windows/Linux): source current file
 
 SendTextPlus uses Sublime build system to source files, you might have to choose the `SendTextPlus` build system before pressing the keys.
 
@@ -37,7 +37,7 @@ SendTextPlus uses Sublime build system to source files, you might have to choose
 
 There are two things that you need to do:
 
-1. Due to this [bug!?](http://www.autohotkey.com/board/topic/92360-controlsend-messes-up-modifiers/), you have to change the paste shortcut of Cmder from `shift+insert` to `ctrl+shift+v` in Cmder settings.
+1. Due to this [bug!?](http://www.autohotkey.com/board/topic/92360-controlsend-messes-up-modifiers/), you have to change the paste shortcut of Cmder from <kbd>shift</kbd>+<kbd>insert</kbd> to <kbd>ctrl</kbd>+<kbd>shift</kbd>+<kbd>v</kbd> in Cmder settings.
 
 2. Go to `Paste` in the settings, uncheck, "Confirm <enter> keypress" and "Confirm pasting more than..."
 
