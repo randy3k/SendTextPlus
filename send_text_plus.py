@@ -67,13 +67,9 @@ class SendTextMixin:
 
     @staticmethod
     def iterm_version():
-        try:
-            args = ['osascript', '-e',
-                    'tell app "iTerm" to tell the first terminal to set foo to true']
-            subprocess.check_call(args)
-            return 2.0
-        except:
-            return 2.9
+        args = ['osascript', '-e', 'tell application "iTerm" to get version']
+        ver = subprocess.check_output(args).decode().strip()
+        return tuple((int(i) for i in re.split(r"\.", ver)[0:2]))
 
     def _send_text_terminal(self, cmd):
         cmd = self.clean_cmd(cmd)
@@ -86,11 +82,11 @@ class SendTextMixin:
         cmd = self.clean_cmd(cmd)
         cmd = self.escape_dquote(cmd)
         ver = self.iterm_version()
-        if ver == 2.0:
-            args = ['osascript', '-e', 'tell app "iTerm" to tell the first terminal ' +
+        if ver >= (2, 9):
+            args = ['osascript', '-e', 'tell app "iTerm" to tell the first window ' +
                     'to tell current session to write text "' + cmd + '"']
         else:
-            args = ['osascript', '-e', 'tell app "iTerm" to tell the first terminal window ' +
+            args = ['osascript', '-e', 'tell app "iTerm" to tell the first terminal ' +
                     'to tell current session to write text "' + cmd + '"']
         subprocess.check_call(args)
 
@@ -142,13 +138,6 @@ class SendTextMixin:
         elif prog == 'iTerm':
             self._send_text_iterm(cmd)
 
-        # elif plat == "osx" and re.match('R[0-9]*$', prog):
-        #     cmd = self.clean_cmd(cmd)
-        #     cmd = self.escape_dquote(cmd)
-        #     args = ['osascript']
-        #     args.extend(['-e', 'tell app "' + prog + '" to cmd "' + cmd + '"'])
-        #     subprocess.Popen(args)
-
         elif prog == "tmux":
             self._send_text_tmux(cmd, settings.get("tmux", "tmux"))
 
@@ -161,10 +150,6 @@ class SendTextMixin:
             sublime.active_window().run_command(
                 "repl_send", {"external_id": external_id, "text": cmd})
             return
-
-        # elif plat == "windows" and re.match('R[0-9]*$', prog):
-        #     progpath = settings.get(prog, "1" if prog == "R64" else "0")
-        #     self._send_text_ahk(cmd, progpath, "Rgui.ahk")
 
         elif prog == "Cygwin":
             self._send_text_ahk(cmd, "", "Cygwin.ahk")
