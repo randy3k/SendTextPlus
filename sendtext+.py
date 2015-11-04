@@ -6,50 +6,12 @@ import subprocess
 import sys
 
 
-class SyntaxSettings:
-
-    def __init__(self, syntax):
-        self.syntax = syntax
-
-    def get(self, key, default=None):
-        settings = sublime.load_settings("SendTextPlus.sublime-settings")
-        ret = None
-        plat = sublime.platform()
-        if self.syntax:
-            lang_settings = settings.get(self.syntax)
-            if lang_settings:
-                os_settings = lang_settings.get(plat)
-                if os_settings:
-                    ret = os_settings.get(key)
-                if ret is None:
-                    ret = lang_settings.get(key)
-        if ret is None:
-            ret = settings.get("default").get(plat).get(key)
-        if ret is None:
-            ret = settings.get("default").get(key)
-        if ret is None:
-            ret = default
-        return ret
+def sget(key, default=None):
+    s = sublime.load_settings("SendText+.sublime-settings")
+    return s.get(key, default)
 
 
-class SyntaxMixin:
-
-    def get_syntax(self):
-        view = self.view
-        pt = view.sel()[0].begin() if len(view.sel()) > 0 else 0
-        if view.score_selector(pt, "source.r"):
-            return "r"
-        elif view.score_selector(pt, "source.python"):
-            return "python"
-        elif view.score_selector(pt, "source.julia"):
-            return "julia"
-
-    def syntax_settings(self):
-        syntax = self.get_syntax()
-        return SyntaxSettings(syntax)
-
-
-class SendTextMixin:
+class TextSender:
 
     @staticmethod
     def clean_cmd(cmd):
@@ -126,26 +88,33 @@ class SendTextMixin:
 
     def _send_text_ahk(self, cmd, progpath="", script="Rgui.ahk"):
         cmd = self.clean_cmd(cmd)
-        ahk_path = os.path.join(sublime.packages_path(), 'User', 'SendTextPlus', 'bin', 'AutoHotkeyU32')
-        ahk_script_path = os.path.join(sublime.packages_path(), 'User', 'SendTextPlus', 'bin', script)
+        ahk_path = os.path.join(sublime.packages_path(),
+                                'User', 'SendText+', 'bin', 'AutoHotkeyU32')
+        ahk_script_path = os.path.join(sublime.packages_path(),
+                                       'User', 'SendText+', 'bin', script)
         # manually add "\n" to keep the indentation of first line of block code,
         # "\n" is later removed in AutoHotkey script
         cmd = "\n" + cmd
-        args = [ahk_path, ahk_script_path, progpath, cmd]
-        subprocess.Popen(args)
+        subprocess.Popen([ahk_path, ahk_script_path, progpath, cmd])
+
+    def _send_sublime_repl(self, cmd):
+        cmd = self.clean_cmd(cmd)
+        window = sublime.active_window()
+        view = window.active_view()
+        external_id = view.scope_name(0).split(" ")[0].split(".", 1)[1]
+        window.run_command(
+            "repl_send", {"external_id": external_id, "text": cmd})
 
     def send_text(self, cmd):
-        view = self.view
         if cmd.strip() == "":
             return
         plat = sublime.platform()
-        settings = self.syntax_settings()
         if plat == "osx":
-            prog = settings.get("prog", "Terminal")
+            prog = sget("prog", "Terminal")
         if plat == "windows":
-            prog = settings.get("prog", "Cmder")
+            prog = sget("prog", "Cmder")
         if plat == "linux":
-            prog = settings.get("prog", "tmux")
+            prog = sget("prog", "tmux")
 
         if prog == 'Terminal':
             self._send_text_terminal(cmd)
@@ -154,17 +123,13 @@ class SendTextMixin:
             self._send_text_iterm(cmd)
 
         elif prog == "tmux":
-            self._send_text_tmux(cmd, settings.get("tmux", "tmux"))
+            self._send_text_tmux(cmd, sget("tmux", "tmux"))
 
         elif prog == "screen":
-            self._send_text_screen(cmd, settings.get("screen", "screen"))
+            self._send_text_screen(cmd, sget("screen", "screen"))
 
         elif prog == "SublimeREPL":
-            cmd = self.clean_cmd(cmd)
-            external_id = view.scope_name(0).split(" ")[0].split(".", 1)[1]
-            sublime.active_window().run_command(
-                "repl_send", {"external_id": external_id, "text": cmd})
-            return
+            self._send_sublime_repl(cmd)
 
         elif prog == "Cygwin":
             self._send_text_ahk(cmd, "", "Cygwin.ahk")
@@ -173,9 +138,44 @@ class SendTextMixin:
             self._send_text_ahk(cmd, "", "Cmder.ahk")
 
 
-class ExpandBlockMixin:
+class TextGetter:
 
-    def _expand_block_r(self, sel):
+    def __init__(self, view):
+        self.view = view
+
+    def expand_block(sel):
+        return sel
+
+    def get_text(self):
+        view = self.view
+        cmd = ''
+        moved = False
+        for sel in [s for s in view.sel()]:
+            if sel.empty():
+                esel = self.expand_block(sel)
+                thiscmd = view.substr(view.line(esel))
+                line = view.rowcol(esel.end())[0]
+                if sget("auto_advance", True):
+                    view.sel().subtract(sel)
+                    pt = view.text_point(line+1, 0)
+                    nextpt = view.find(r"\S", pt)
+                    if nextpt.begin() != -1:
+                        pt = view.text_point(view.rowcol(nextpt.begin())[0], 0)
+                    view.sel().add(sublime.Region(pt, pt))
+                    moved = True
+            else:
+                thiscmd = view.substr(sel)
+            cmd += thiscmd + '\n'
+
+        if moved:
+            view.show(view.sel())
+
+        return cmd
+
+
+class RTextGetter(TextGetter):
+
+    def expand_block(self, sel):
         view = self.view
         # expand selection to {...}
         thiscmd = view.substr(view.line(sel))
@@ -188,7 +188,17 @@ class ExpandBlockMixin:
                 sel = esel
         return sel
 
-    def _expand_block_python(self, sel):
+
+class PythonTextGetter(TextGetter):
+
+    def get_text(self):
+        cmd = super(PythonTextGetter, self).get_text()
+        cmd = cmd.rstrip("\n")
+        if len(re.findall("\n", cmd)) > 0:
+            cmd = "%cpaste\n" + cmd + "\n--"
+        return cmd
+
+    def expand_block(self, sel):
         view = self.view
         thiscmd = view.substr(view.line(sel))
         if re.match(r"^[ \t]*\S", thiscmd):
@@ -212,7 +222,10 @@ class ExpandBlockMixin:
                 sel = sublime.Region(sel.begin(), prevline.end())
         return sel
 
-    def _expand_block_julia(self, sel):
+
+class JuliaTextGetter(TextGetter):
+
+    def expand_block(self, sel):
         view = self.view
         thiscmd = view.substr(view.line(sel))
         if (re.match(r"^\s*(?:function|if|for|while)", thiscmd) and
@@ -224,59 +237,29 @@ class ExpandBlockMixin:
 
         return sel
 
-    def expand_block(self, sel):
-        syntax = self.get_syntax()
-        if syntax == "r":
-            esel = self._expand_block_r(sel)
-        elif syntax == "python":
-            esel = self._expand_block_python(sel)
-        elif syntax == "julia":
-            esel = self._expand_block_julia(sel)
-        else:
-            esel = sel
-        return esel
 
+class SendTextPlusCommand(sublime_plugin.TextCommand):
 
-class SendTextPlusCommand(sublime_plugin.TextCommand,
-                          SyntaxMixin,
-                          SendTextMixin,
-                          ExpandBlockMixin):
     def run(self, edit):
         view = self.view
-        settings = self.syntax_settings()
-        cmd = ''
-        moved = False
-        for sel in [s for s in view.sel()]:
-            if sel.empty():
-                esel = self.expand_block(sel)
-                thiscmd = view.substr(view.line(esel))
-                line = view.rowcol(esel.end())[0]
-                if settings.get("auto_advance", False):
-                    view.sel().subtract(sel)
-                    pt = view.text_point(line+1, 0)
-                    nextpt = view.find(r"\S", pt)
-                    if nextpt.begin() != -1:
-                        pt = view.text_point(view.rowcol(nextpt.begin())[0], 0)
-                    view.sel().add(sublime.Region(pt, pt))
-                    moved = True
-            else:
-                thiscmd = view.substr(sel)
-            cmd += thiscmd + '\n'
+        pt = view.sel()[0].begin() if len(view.sel()) > 0 else 0
+        if view.score_selector(pt, "source.r"):
+            getter = RTextGetter(view)
+        elif view.score_selector(pt, "source.python"):
+            getter = PythonTextGetter(view)
+        elif view.score_selector(pt, "source.julia"):
+            getter = JuliaTextGetter(view)
+        else:
+            getter = TextGetter(view)
 
-        if self.get_syntax() == "python":
-            cmd = self.clean_cmd(cmd)
-            if len(re.findall("\n", cmd)) > 0:
-                cmd = "%cpaste\n" + cmd + "\n--"
+        cmd = getter.get_text()
 
-        self.send_text(cmd)
-
-        if moved:
-            view.show(view.sel())
+        sender = TextSender()
+        sender.send_text(cmd)
 
 
-class SendTextPlusChangeDirCommand(sublime_plugin.TextCommand,
-                                   SyntaxMixin,
-                                   SendTextMixin):
+class SendTextPlusChangeDirCommand(sublime_plugin.TextCommand):
+
     def run(self, edit):
         view = self.view
         fname = view.file_name()
@@ -285,23 +268,22 @@ class SendTextPlusChangeDirCommand(sublime_plugin.TextCommand,
             return
 
         dirname = os.path.dirname(fname)
-        syntax = self.get_syntax()
 
-        if syntax == "r":
-            cmd = "setwd(\"" + self.escape_dquote(dirname) + "\")"
-        elif syntax == "julia":
-            cmd = "cd(\"" + self.escape_dquote(dirname) + "\")"
-        elif syntax == "python":
-            cmd = "cd \"" + self.escape_dquote(dirname) + "\""
-        else:
-            return
+        sender = TextSender()
 
-        self.send_text(cmd + "\n")
+        pt = view.sel()[0].begin() if len(view.sel()) > 0 else 0
+        if view.score_selector(pt, "source.r"):
+            cmd = "setwd(\"" + sender.escape_dquote(dirname) + "\")"
+        elif view.score_selector(pt, "source.python"):
+            cmd = "cd \"" + sender.escape_dquote(dirname) + "\""
+        elif view.score_selector(pt, "source.julia"):
+            cmd = "cd(\"" + sender.escape_dquote(dirname) + "\")"
+
+        sender.send_text(cmd+"\n")
 
 
-class SendTextPlusSourceCodeCommand(sublime_plugin.TextCommand,
-                                    SyntaxMixin,
-                                    SendTextMixin):
+class SendTextPlusSourceCodeCommand(sublime_plugin.TextCommand):
+
     def run(self, edit):
         view = self.view
         fname = view.file_name()
@@ -309,21 +291,46 @@ class SendTextPlusSourceCodeCommand(sublime_plugin.TextCommand,
             sublime.error_message("Save the file!")
             return
 
-        syntax = self.get_syntax()
+        sender = TextSender()
 
-        if syntax == "r":
-            cmd = "source(\"" + self.escape_dquote(fname) + "\")"
-        elif syntax == "julia":
-            cmd = "include(\"" + self.escape_dquote(fname) + "\")"
-        elif syntax == "python":
-            cmd = "%run \"" + self.escape_dquote(fname) + "\""
-        else:
-            return
+        pt = view.sel()[0].begin() if len(view.sel()) > 0 else 0
+        if view.score_selector(pt, "source.r"):
+            cmd = "source(\"" + sender.escape_dquote(fname) + "\")"
+        elif view.score_selector(pt, "source.python"):
+            cmd = "%run \"" + sender.escape_dquote(fname) + "\""
+        elif view.score_selector(pt, "source.julia"):
+            cmd = "include(\"" + sender.escape_dquote(fname) + "\")"
 
-        self.send_text(cmd + "\n")
+        sender.send_text(cmd+"\n")
 
 
 class SendTextPlusBuildCommand(sublime_plugin.WindowCommand):
 
     def run(self):
         self.window.active_view().run_command("send_text_plus_source_code")
+
+
+class SendTextPlusChooseProgramCommand(sublime_plugin.WindowCommand):
+
+    def show_quick_panel(self, options, done):
+        sublime.set_timeout(lambda: self.window.show_quick_panel(options, done), 10)
+
+    def run(self):
+        plat = sublime.platform()
+        if plat == 'osx':
+            self.app_list = ["Terminal", "iTerm", "tmux", "screen", "SublimeREPL"]
+        elif plat == "windows":
+            self.app_list = ["Cmder", "Cygwin", "SublimeREPL"]
+        elif plat == "linux":
+            self.app_list = ["tmux", "screen", "SublimeREPL"]
+        else:
+            sublime.error_message("Platform not supported!")
+
+        self.show_quick_panel(self.app_list, self.on_done)
+
+    def on_done(self, action):
+        if action == -1:
+            return
+        settings = sublime.load_settings('SendText+.sublime-settings')
+        settings.set("prog", self.app_list[action])
+        sublime.save_settings('SendText+.sublime-settings')

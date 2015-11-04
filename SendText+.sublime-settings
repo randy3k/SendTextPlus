@@ -1,0 +1,10 @@
+{
+    // path to tmux and screen (linux/mac)
+    // "tmux" : "tmux",
+    // "screen" : "screen",
+
+    // auto advance to the next non-empty line.
+    // "auto_advance" : true,
+    // prog could be Terminal, iTerm, Cmder, Cygwin, tmux, screen and SublimeREPL
+    // "prog" : "Terminal"
+}

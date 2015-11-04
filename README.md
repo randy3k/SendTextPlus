@@ -8,15 +8,12 @@ This package improves [SendText](https://github.com/wch/SendText), particularly 
  - [Cmder](http://bliker.github.io/cmder) and Cygwin on Windows (see below to configure Cmder)
  - SublimeREPL for R and python syntaxes (it works better with R)
 
-Terminal is the default for Mac, Cmder for Windows and tmux for Linux. To change the settings, open Preferences -> Package Settings -> SendTextPlus -> Settings.
+Terminal is the default for Mac, Cmder for Windows and tmux for Linux. To change the settings, open Preferences -> Package Settings -> SendText+ -> Settings.
 
 
 ### Installation
 
 Via Package Control.
-
-### Demo
-![](https://raw.githubusercontent.com/randy3k/SendTextPlus/master/send_text_plus.gif)
 
 ### Usage
 
