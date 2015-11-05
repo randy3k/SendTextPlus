@@ -44,7 +44,6 @@ class TextSender:
     def _send_text_iterm(self, cmd):
         cmd = self.clean_cmd(cmd)
         if self.iterm_version() >= (2, 9):
-            cmd = cmd
             n = 1000
             chunks = [cmd[i:i+n] for i in range(0, len(cmd), n)]
             for chunk in chunks:
@@ -106,8 +105,6 @@ class TextSender:
             "repl_send", {"external_id": external_id, "text": cmd})
 
     def send_text(self, cmd):
-        if cmd.strip() == "":
-            return
         plat = sublime.platform()
         if plat == "osx":
             prog = sget("prog", "Terminal")
