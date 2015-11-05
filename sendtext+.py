@@ -143,7 +143,7 @@ class TextGetter:
     def __init__(self, view):
         self.view = view
 
-    def expand_block(sel):
+    def expand_block(self, sel):
         return sel
 
     def get_text(self):
