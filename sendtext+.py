@@ -97,7 +97,7 @@ class TextSender:
         cmd = "\n" + cmd
         subprocess.Popen([ahk_path, ahk_script_path, progpath, cmd])
 
-    def _send_sublime_repl(self, cmd):
+    def _send_text_sublime_repl(self, cmd):
         cmd = self.clean_cmd(cmd)
         window = sublime.active_window()
         view = window.active_view()
@@ -129,7 +129,7 @@ class TextSender:
             self._send_text_screen(cmd, sget("screen", "screen"))
 
         elif prog == "SublimeREPL":
-            self._send_sublime_repl(cmd)
+            self._send_text_sublime_repl(cmd)
 
         elif prog == "Cygwin":
             self._send_text_ahk(cmd, "", "Cygwin.ahk")
