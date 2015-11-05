@@ -140,29 +140,30 @@ class TextGetter:
     def __init__(self, view):
         self.view = view
 
-    def expand_block(self, sel):
-        return sel
+    def expand_line(self, s):
+        return self.view.line(s)
+
+    def advance(self, s):
+        view = self.view
+        view.sel().subtract(s)
+        pt = view.text_point(view.rowcol(s.end())[0]+1, 0)
+        nextpt = view.find(r"\S", pt)
+        if nextpt.begin() != -1:
+            pt = view.text_point(view.rowcol(nextpt.begin())[0], 0)
+        view.sel().add(sublime.Region(pt, pt))
 
     def get_text(self):
         view = self.view
         cmd = ''
         moved = False
-        for sel in [s for s in view.sel()]:
-            if sel.empty():
-                esel = self.expand_block(sel)
-                thiscmd = view.substr(view.line(esel))
-                line = view.rowcol(esel.end())[0]
+        for s in [s for s in view.sel()]:
+            if s.empty():
+                s = self.expand_line(s)
                 if sget("auto_advance", True):
-                    view.sel().subtract(sel)
-                    pt = view.text_point(line+1, 0)
-                    nextpt = view.find(r"\S", pt)
-                    if nextpt.begin() != -1:
-                        pt = view.text_point(view.rowcol(nextpt.begin())[0], 0)
-                    view.sel().add(sublime.Region(pt, pt))
+                    self.advance(s)
                     moved = True
-            else:
-                thiscmd = view.substr(sel)
-            cmd += thiscmd + '\n'
+
+            cmd += view.substr(s) + '\n'
 
         if moved:
             view.show(view.sel())
@@ -172,36 +173,31 @@ class TextGetter:
 
 class RTextGetter(TextGetter):
 
-    def expand_block(self, sel):
+    def expand_line(self, s):
         view = self.view
         # expand selection to {...}
-        thiscmd = view.substr(view.line(sel))
+        s = view.line(s)
+        thiscmd = view.substr(s)
         if re.match(r".*\{\s*$", thiscmd):
-            esel = view.find(
+            es = view.find(
                 r"""^(?:.*(\{(?:(["\'])(?:[^\\]|\\.)*?\2|#.*$|[^\{\}]|(?1))*\})[^\{\}\n]*)+""",
-                view.line(sel).begin()
+                view.line(s).begin()
             )
-            if view.line(sel).begin() == esel.begin():
-                sel = esel
-        return sel
+            if s.begin() == es.begin():
+                s = es
+        return s
 
 
 class PythonTextGetter(TextGetter):
 
-    def get_text(self):
-        cmd = super(PythonTextGetter, self).get_text()
-        cmd = cmd.rstrip("\n")
-        if len(re.findall("\n", cmd)) > 0:
-            cmd = "%cpaste\n" + cmd + "\n--"
-        return cmd
-
-    def expand_block(self, sel):
+    def expand_line(self, s):
         view = self.view
-        thiscmd = view.substr(view.line(sel))
+        s = view.line(s)
+        thiscmd = view.substr(s)
         if re.match(r"^[ \t]*\S", thiscmd):
             indentation = re.match(r"^([ \t]*)", thiscmd).group(1)
-            row = view.rowcol(sel.begin())[0]
-            prevline = view.line(sel.begin())
+            row = view.rowcol(s.begin())[0]
+            prevline = view.line(s.begin())
             lastrow = view.rowcol(view.size())[0]
             while row < lastrow:
                 row = row + 1
@@ -210,29 +206,37 @@ class PythonTextGetter(TextGetter):
                 if m and len(m.group(1)) <= len(indentation) and \
                         (len(m.group(1)) < len(indentation) or
                             not re.match(r"else|elif|except|finally", m.group(2))):
-                    sel = sublime.Region(sel.begin(), prevline.end())
+                    s = sublime.Region(s.begin(), prevline.end())
                     break
                 elif re.match(r"^[ \t]*\S", view.substr(line)):
                     prevline = line
 
             if row == lastrow:
-                sel = sublime.Region(sel.begin(), prevline.end())
-        return sel
+                s = sublime.Region(s.begin(), prevline.end())
+        return s
+
+    def get_text(self):
+        cmd = super(PythonTextGetter, self).get_text()
+        cmd = cmd.rstrip("\n")
+        if len(re.findall("\n", cmd)) > 0:
+            cmd = "%cpaste\n" + cmd + "\n--"
+        return cmd
 
 
 class JuliaTextGetter(TextGetter):
 
-    def expand_block(self, sel):
+    def expand_line(self, s):
         view = self.view
-        thiscmd = view.substr(view.line(sel))
+        s = view.line(s)
+        thiscmd = view.substr(s)
         if (re.match(r"^\s*(?:function|if|for|while)", thiscmd) and
                 not re.match(r".*end\s*$", thiscmd)) or \
                 (re.match(r".*begin\s*$", thiscmd)):
             indentation = re.match("^(\s*)", thiscmd).group(1)
-            end = view.find("^"+indentation+"end", sel.begin())
-            sel = sublime.Region(sel.begin(), view.line(end.end()).end())
+            end = view.find("^"+indentation+"end", s.begin())
+            s = sublime.Region(s.begin(), view.line(end.end()).end())
 
-        return sel
+        return s
 
 
 class SendTextPlusCommand(sublime_plugin.TextCommand):
