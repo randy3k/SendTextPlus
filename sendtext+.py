@@ -104,6 +104,41 @@ class TextSender:
         window.run_command(
             "repl_send", {"external_id": external_id, "text": cmd})
 
+    def _send_text_jupyter(self, cmd):
+        cmd = self.clean_cmd(cmd)
+        cmd = cmd.replace('"', '\\\\\\\"')
+        cmd = cmd.replace('\n', '\\\\n')
+        print(cmd)
+        script = (u'''
+            tell application "Google Chrome"
+                set cmd to "''' + cmd + '''"
+                repeat with w in windows
+                set i to 0
+                repeat with t in (tabs of w)
+                set i to i + 1
+                if URL of t contains "notebooks" then
+                tell t to set URL to "javascript:{
+                mycell = window.IPython.notebook.insert_cell_below();
+                mycell.set_text(" & quote & cmd & quote & ");
+                IPython.notebook.select_next();
+                IPython.notebook.scroll_to_cell( IPython.notebook.find_cell_index(mycell));
+                mycell.execute()}"
+                exit repeat
+                end if
+                end repeat
+                if URL of t contains "notebooks" then
+                exit repeat
+                end if
+                end repeat
+            end tell
+        ''')
+        print(script)
+        proc = subprocess.Popen(['osascript'],
+                                stdin=subprocess.PIPE,
+                                universal_newlines = True)
+        proc.stdin.write(script)
+        proc.stdin.close()
+
     def send_text(self, cmd):
         plat = sublime.platform()
         if plat == "osx":
@@ -115,6 +150,9 @@ class TextSender:
 
         if prog == 'Terminal':
             self._send_text_terminal(cmd)
+
+        if prog == 'Jupyter':
+            self._send_text_jupyter(cmd)
 
         elif prog == 'iTerm':
             self._send_text_iterm(cmd)
@@ -218,7 +256,7 @@ class PythonTextGetter(TextGetter):
     def get_text(self):
         cmd = super(PythonTextGetter, self).get_text()
         cmd = cmd.rstrip("\n")
-        if len(re.findall("\n", cmd)) > 0:
+        if (len(re.findall("\n", cmd))) > 0 and (sget("prog") != 'Jupyter'):
             cmd = "%cpaste\n" + cmd + "\n--"
         return cmd
 
