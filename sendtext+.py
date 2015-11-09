@@ -106,9 +106,9 @@ class TextSender:
 
     def _send_text_jupyter(self, cmd):
         cmd = self.clean_cmd(cmd)
+        cmd = cmd.replace('\\', r'\\\\ '.rstrip(' '))
         cmd = cmd.replace('"', '\\\\\\\"')
         cmd = cmd.replace('\n', '\\\\n')
-        print(cmd)
         script = (u'''
             tell application "Google Chrome"
                 set cmd to "''' + cmd + '''"
@@ -132,7 +132,6 @@ class TextSender:
                 end repeat
             end tell
         ''')
-        print(script)
         proc = subprocess.Popen(['osascript'],
                                 stdin=subprocess.PIPE,
                                 universal_newlines = True)
