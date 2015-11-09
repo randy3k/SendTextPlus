@@ -5,7 +5,7 @@ This package improves [SendText](https://github.com/wch/SendText), particularly 
 
  - Terminal and iTerm on Mac
  - screen and tmux on Unix machines
- - [Cmder](http://bliker.github.io/cmder) and Cygwin on Windows (see below to configure Cmder)
+ - [Cmder](http://cmder.net) and Cygwin on Windows (see below to configure Cmder)
  - SublimeREPL for R and python syntaxes (it works better with R)
 
 Terminal is the default for Mac, Cmder for Windows and tmux for Linux. To change the default program, launch `SendText+: Choose Program` in command palatte.
