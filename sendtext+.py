@@ -357,7 +357,7 @@ class SendTextPlusChooseProgramCommand(sublime_plugin.WindowCommand):
     def run(self):
         plat = sublime.platform()
         if plat == 'osx':
-            self.app_list = ["Terminal", "iTerm", "tmux", "screen", "SublimeREPL"]
+            self.app_list = ["Terminal", "iTerm", "tmux", "screen", "SublimeREPL", "Jupyter"]
         elif plat == "windows":
             self.app_list = ["Cmder", "Cygwin", "SublimeREPL"]
         elif plat == "linux":
