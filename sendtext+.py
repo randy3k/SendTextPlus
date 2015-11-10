@@ -98,23 +98,29 @@ class TextSender:
 
     def _send_rstudio_chrome(self, cmd):
         cmd = self.clean_cmd(cmd)
+        cmd = self.escape_dquote(cmd)
+        cmd = cmd.replace("\n", r"\n")
         script = """
+        on run argv
             tell application "Google Chrome"
-                paste selection front window's active tab
-                set js to "
+                set URL of front window's active tab to "javascript:{" & "
+                    var input = document.getElementById('rstudio_console_input');
+                    var textarea = input.getElementsByTagName('textarea')[0];
+                    textarea.value += \\"" & item 1 of argv & "\\";
+
                     var e = document.createEvent('KeyboardEvent');
-                    e.initKeyboardEvent('keydown', true, true, null,
-                                        'Enter', 0, false, false, false);
+                    e.initKeyboardEvent('input');
+                    textarea.dispatchEvent(e);
+
+                    var e = document.createEvent('KeyboardEvent');
+                    e.initKeyboardEvent('keydown');
                     Object.defineProperty(e, 'keyCode', {'value' : 13});
-                    document.getElementById('rstudio_console_input').dispatchEvent(e);
-                "
-                set URL of front window's active tab to "javascript:{" & js & "}"
+                    input.dispatchEvent(e);
+                " & "}"
             end tell
+        end run
         """
-        ocb = sublime.get_clipboard()
-        sublime.set_clipboard(cmd)
-        subprocess.call(['osascript', '-e', script])
-        sublime.set_timeout(lambda: sublime.set_clipboard(ocb), 2000)
+        subprocess.call(['osascript', '-e', script, cmd])
 
     def _send_rstudio_safari(self, cmd):
         cmd = self.clean_cmd(cmd)
@@ -124,8 +130,8 @@ class TextSender:
         on run argv
             tell application "Safari"
                 tell front window's tab 1 to do JavaScript "
-                    input = document.getElementById('rstudio_console_input');
-                    textarea = input.getElementsByTagName('textarea')[0];
+                    var input = document.getElementById('rstudio_console_input');
+                    var textarea = input.getElementsByTagName('textarea')[0];
                     textarea.value += \\"" & item 1 of argv & "\\";
 
                     var e = document.createEvent('KeyboardEvent');
@@ -133,11 +139,10 @@ class TextSender:
                     textarea.dispatchEvent(e);
 
                     var e = document.createEvent('KeyboardEvent');
-                    e.initKeyboardEvent('keydown', true, true, null,
-                                        'Enter', 0, false, false, false);
+                    e.initKeyboardEvent('keydown');
                     Object.defineProperty(e, 'keyCode', {'value' : 13});
                     input.dispatchEvent(e);
-                    "
+                "
             end tell
         end run
         """
