@@ -96,6 +96,25 @@ class TextSender:
         cmd = "\n" + cmd
         subprocess.Popen([ahk_path, ahk_script_path, progpath, cmd])
 
+    def _send_rstudio_chrome(self, cmd):
+        cmd = self.clean_cmd(cmd)
+        script = ("""
+            tell application "Google Chrome"
+                paste selection front window's active tab
+                set js to "
+            var e = document.createEvent('KeyboardEvent');
+            e.initKeyboardEvent('keydown', true, true, null, 'Enter', 0, false, false, false);
+            Object.defineProperty(e, 'keyCode', {'value' : 13});
+            document.getElementById('rstudio_console_input').dispatchEvent(e);
+            "
+                set URL of front window's active tab to "javascript:{" & js & "}"
+            end tell
+        """)
+        ocb = sublime.get_clipboard()
+        sublime.set_clipboard(cmd)
+        subprocess.call(['osascript', '-e', script])
+        sublime.set_timeout(lambda: sublime.set_clipboard(ocb), 2000)
+
     def _send_text_sublime_repl(self, cmd):
         cmd = self.clean_cmd(cmd)
         window = sublime.active_window()
@@ -127,6 +146,9 @@ class TextSender:
 
         elif prog == "SublimeREPL":
             self._send_text_sublime_repl(cmd)
+
+        elif prog == "RStudio-Chrome":
+            self._send_rstudio_chrome(cmd)
 
         elif prog == "Cygwin":
             self._send_text_ahk(cmd, "", "Cygwin.ahk")
@@ -319,7 +341,7 @@ class SendTextPlusChooseProgramCommand(sublime_plugin.WindowCommand):
     def run(self):
         plat = sublime.platform()
         if plat == 'osx':
-            self.app_list = ["Terminal", "iTerm", "tmux", "screen", "SublimeREPL"]
+            self.app_list = ["Terminal", "iTerm", "tmux", "screen", "RStudio-Chrome", "SublimeREPL"]
         elif plat == "windows":
             self.app_list = ["Cmder", "Cygwin", "SublimeREPL"]
         elif plat == "linux":
