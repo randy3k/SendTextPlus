@@ -163,6 +163,44 @@ class TextSender:
         window.run_command(
             "repl_send", {"external_id": external_id, "text": cmd})
 
+    def _send_text_chrome_jupyter(self, cmd):
+        cmd = self.clean_cmd(cmd)
+        cmd = self.escape_dquote(cmd)
+        cmd = cmd.replace("\n", r"\n")
+        script = """
+        on run argv
+            tell application "Google Chrome"
+                set URL of front window's active tab to "javascript:{" & "
+                    mycell = window.IPython.notebook.insert_cell_below();
+                    mycell.set_text(\\"" & item 1 of argv & "\\");
+                    IPython.notebook.select_next();
+                    IPython.notebook.scroll_to_cell( IPython.notebook.find_cell_index(mycell));
+                    mycell.execute()"
+                " & "}"
+            end tell
+        end run
+        """
+        subprocess.call(['osascript', '-e', script, cmd])
+
+    def _send_text_safari_jupyter(self, cmd):
+        cmd = self.clean_cmd(cmd)
+        cmd = self.escape_dquote(cmd)
+        cmd = cmd.replace("\n", r"\n")
+        script = """
+        on run argv
+            tell application "Safari"
+                tell front window's tab 1 to do JavaScript "
+                    mycell = window.IPython.notebook.insert_cell_below();
+                    mycell.set_text(\\"" & item 1 of argv & "\\");
+                    IPython.notebook.select_next();
+                    IPython.notebook.scroll_to_cell( IPython.notebook.find_cell_index(mycell));
+                    mycell.execute()"
+                "
+            end tell
+        end run
+        """
+        subprocess.call(['osascript', '-e', script, cmd])
+
     def send_text(self, cmd):
         plat = sublime.platform()
         if plat == "osx":
@@ -286,7 +324,7 @@ class PythonTextGetter(TextGetter):
     def get_text(self):
         cmd = super(PythonTextGetter, self).get_text()
         cmd = cmd.rstrip("\n")
-        if len(re.findall("\n", cmd)) > 0:
+        if (len(re.findall("\n", cmd))) > 0 and (sget("prog") != 'Jupyter'):
             cmd = "%cpaste\n" + cmd + "\n--"
         return cmd
 

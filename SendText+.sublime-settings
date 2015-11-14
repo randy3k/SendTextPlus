@@ -5,6 +5,6 @@
 
     // auto advance to the next non-empty line.
     // "auto_advance" : true,
-    // prog could be Terminal, iTerm, Cmder, Cygwin, tmux, screen and SublimeREPL
+    // prog could be Terminal, iTerm, Cmder, Cygwin, tmux, screen and SublimeREPL, Jupyter (i.e. Ipython Notebook)
     // "prog" : "Terminal"
 }
