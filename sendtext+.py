@@ -100,6 +100,9 @@ class TextSender:
         cmd = self.clean_cmd(cmd)
         cmd = self.escape_dquote(cmd)
         cmd = cmd.replace("\n", r"\n")
+        # use window.desktopHooks.evaluateRCmd once
+        # https://github.com/rstudio/rstudio/commit/3c11a669e7eaae0af40b935fb22cf1bf0e7d6b73
+        # is released.
         script = """
         on run argv
             tell application "Google Chrome"
@@ -127,7 +130,7 @@ class TextSender:
         script = """
         on run argv
             tell application "Safari"
-                tell front window's tab 1 to do JavaScript "
+                tell front window's current tab to do JavaScript "
                     var input = document.getElementById('rstudio_console_input');
                     var textarea = input.getElementsByTagName('textarea')[0];
                     textarea.value += \\"" & item 1 of argv & "\\";
@@ -155,15 +158,9 @@ class TextSender:
         """
         subprocess.call(['osascript', '-e', script, cmd])
 
-    def _send_text_sublime_repl(self, cmd):
-        cmd = self.clean_cmd(cmd)
-        window = sublime.active_window()
-        view = window.active_view()
-        external_id = view.scope_name(0).split(" ")[0].split(".", 1)[1]
-        window.run_command(
-            "repl_send", {"external_id": external_id, "text": cmd})
-
     def _send_text_chrome_jupyter(self, cmd):
+        # remove possible ipython code block
+        cmd = re.sub(r"%cpaste\n(.*)\n--", r"\1", cmd, flags=re.S)
         cmd = self.clean_cmd(cmd)
         cmd = self.escape_dquote(cmd)
         cmd = cmd.replace("\n", r"\n")
@@ -171,11 +168,12 @@ class TextSender:
         on run argv
             tell application "Google Chrome"
                 set URL of front window's active tab to "javascript:{" & "
-                    mycell = window.IPython.notebook.insert_cell_below();
+                    var mycell = IPython.notebook.get_selected_cell();
                     mycell.set_text(\\"" & item 1 of argv & "\\");
-                    IPython.notebook.select_next();
                     IPython.notebook.scroll_to_cell( IPython.notebook.find_cell_index(mycell));
-                    mycell.execute()"
+                    mycell.execute();
+                    IPython.notebook.insert_cell_below();
+                    IPython.notebook.select_next();
                 " & "}"
             end tell
         end run
@@ -183,23 +181,34 @@ class TextSender:
         subprocess.call(['osascript', '-e', script, cmd])
 
     def _send_text_safari_jupyter(self, cmd):
+        # remove possible ipython code block
+        cmd = re.sub(r"%cpaste\n(.*)\n--", r"\1", cmd, flags=re.S)
         cmd = self.clean_cmd(cmd)
         cmd = self.escape_dquote(cmd)
         cmd = cmd.replace("\n", r"\n")
         script = """
         on run argv
             tell application "Safari"
-                tell front window's tab 1 to do JavaScript "
-                    mycell = window.IPython.notebook.insert_cell_below();
+                tell front window's current tab to do JavaScript "
+                    var mycell = IPython.notebook.get_selected_cell();
                     mycell.set_text(\\"" & item 1 of argv & "\\");
-                    IPython.notebook.select_next();
                     IPython.notebook.scroll_to_cell( IPython.notebook.find_cell_index(mycell));
-                    mycell.execute()"
+                    mycell.execute();
+                    IPython.notebook.insert_cell_below();
+                    IPython.notebook.select_next();
                 "
             end tell
         end run
         """
         subprocess.call(['osascript', '-e', script, cmd])
+
+    def _send_text_sublime_repl(self, cmd):
+        cmd = self.clean_cmd(cmd)
+        window = sublime.active_window()
+        view = window.active_view()
+        external_id = view.scope_name(0).split(" ")[0].split(".", 1)[1]
+        window.run_command(
+            "repl_send", {"external_id": external_id, "text": cmd})
 
     def send_text(self, cmd):
         plat = sublime.platform()
@@ -224,6 +233,12 @@ class TextSender:
 
         elif prog == "RStudio":
             self._send_safari_rstudio(cmd)
+
+        elif prog == 'Chrome-Jupyter':
+            self._send_text_chrome_jupyter(cmd)
+
+        elif prog == 'Safari-Jupyter':
+            self._send_text_safari_jupyter(cmd)
 
         elif prog == "tmux":
             self._send_text_tmux(cmd, sget("tmux", "tmux"))
@@ -324,7 +339,7 @@ class PythonTextGetter(TextGetter):
     def get_text(self):
         cmd = super(PythonTextGetter, self).get_text()
         cmd = cmd.rstrip("\n")
-        if (len(re.findall("\n", cmd))) > 0 and (sget("prog") != 'Jupyter'):
+        if len(re.findall("\n", cmd)) > 0:
             cmd = "%cpaste\n" + cmd + "\n--"
         return cmd
 
@@ -425,8 +440,10 @@ class SendTextPlusChooseProgramCommand(sublime_plugin.WindowCommand):
     def run(self):
         plat = sublime.platform()
         if plat == 'osx':
-            self.app_list = ["Terminal", "iTerm", "tmux", "screen",
-                             "RStudio", "Chrome-RStudio", "Safari-RStudio", "SublimeREPL"]
+            self.app_list = ["Terminal", "iTerm",
+                             "RStudio", "Chrome-RStudio", "Safari-RStudio",
+                             "Chrome-Jupyter", "Safari-Jupyter",
+                             "tmux", "screen", "SublimeREPL"]
         elif plat == "windows":
             self.app_list = ["Cmder", "Cygwin", "SublimeREPL"]
         elif plat == "linux":
