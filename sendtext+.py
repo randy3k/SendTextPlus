@@ -104,39 +104,43 @@ class TextSender:
         window.run_command(
             "repl_send", {"external_id": external_id, "text": cmd})
 
-    def _send_text_jupyter(self, cmd):
+    def _send_text_chrome_jupyter(self, cmd):
         cmd = self.clean_cmd(cmd)
-        cmd = cmd.replace('\\', r'\\\\ '.rstrip(' '))
-        cmd = cmd.replace('"', '\\\\\\\"')
-        cmd = cmd.replace('\n', '\\\\n')
-        script = (u'''
+        cmd = self.escape_dquote(cmd)
+        cmd = cmd.replace("\n", r"\n")
+        script = """
+        on run argv
             tell application "Google Chrome"
-                set cmd to "''' + cmd + '''"
-                repeat with w in windows
-                set i to 0
-                repeat with t in (tabs of w)
-                set i to i + 1
-                if URL of t contains "notebooks" then
-                tell t to set URL to "javascript:{
-                mycell = window.IPython.notebook.insert_cell_below();
-                mycell.set_text(" & quote & cmd & quote & ");
-                IPython.notebook.select_next();
-                IPython.notebook.scroll_to_cell( IPython.notebook.find_cell_index(mycell));
-                mycell.execute()}"
-                exit repeat
-                end if
-                end repeat
-                if URL of t contains "notebooks" then
-                exit repeat
-                end if
-                end repeat
+                set URL of front window's active tab to "javascript:{" & "
+                    mycell = window.IPython.notebook.insert_cell_below();
+                    mycell.set_text(\\"" & item 1 of argv & "\\");
+                    IPython.notebook.select_next();
+                    IPython.notebook.scroll_to_cell( IPython.notebook.find_cell_index(mycell));
+                    mycell.execute()"
+                " & "}"
             end tell
-        ''')
-        proc = subprocess.Popen(['osascript'],
-                                stdin=subprocess.PIPE,
-                                universal_newlines = True)
-        proc.stdin.write(script)
-        proc.stdin.close()
+        end run
+        """
+        subprocess.call(['osascript', '-e', script, cmd])
+
+    def _send_text_safari_jupyter(self, cmd):
+        cmd = self.clean_cmd(cmd)
+        cmd = self.escape_dquote(cmd)
+        cmd = cmd.replace("\n", r"\n")
+        script = """
+        on run argv
+            tell application "Safari"
+                tell front window's tab 1 to do JavaScript "
+                    mycell = window.IPython.notebook.insert_cell_below();
+                    mycell.set_text(\\"" & item 1 of argv & "\\");
+                    IPython.notebook.select_next();
+                    IPython.notebook.scroll_to_cell( IPython.notebook.find_cell_index(mycell));
+                    mycell.execute()"
+                "
+            end tell
+        end run
+        """
+        subprocess.call(['osascript', '-e', script, cmd])
 
     def send_text(self, cmd):
         plat = sublime.platform()
@@ -149,9 +153,6 @@ class TextSender:
 
         if prog == 'Terminal':
             self._send_text_terminal(cmd)
-
-        if prog == 'Jupyter':
-            self._send_text_jupyter(cmd)
 
         elif prog == 'iTerm':
             self._send_text_iterm(cmd)
@@ -356,7 +357,7 @@ class SendTextPlusChooseProgramCommand(sublime_plugin.WindowCommand):
     def run(self):
         plat = sublime.platform()
         if plat == 'osx':
-            self.app_list = ["Terminal", "iTerm", "tmux", "screen", "SublimeREPL", "Jupyter"]
+            self.app_list = ["Terminal", "iTerm", "tmux", "screen", "SublimeREPL"]
         elif plat == "windows":
             self.app_list = ["Cmder", "Cygwin", "SublimeREPL"]
         elif plat == "linux":
