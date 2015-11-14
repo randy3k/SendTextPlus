@@ -96,7 +96,7 @@ class TextSender:
         cmd = "\n" + cmd
         subprocess.Popen([ahk_path, ahk_script_path, progpath, cmd])
 
-    def _send_rstudio_chrome(self, cmd):
+    def _send_chrome_rstudio(self, cmd):
         cmd = self.clean_cmd(cmd)
         cmd = self.escape_dquote(cmd)
         cmd = cmd.replace("\n", r"\n")
@@ -107,11 +107,9 @@ class TextSender:
                     var input = document.getElementById('rstudio_console_input');
                     var textarea = input.getElementsByTagName('textarea')[0];
                     textarea.value += \\"" & item 1 of argv & "\\";
-
                     var e = document.createEvent('KeyboardEvent');
                     e.initKeyboardEvent('input');
                     textarea.dispatchEvent(e);
-
                     var e = document.createEvent('KeyboardEvent');
                     e.initKeyboardEvent('keydown');
                     Object.defineProperty(e, 'keyCode', {'value' : 13});
@@ -122,7 +120,7 @@ class TextSender:
         """
         subprocess.call(['osascript', '-e', script, cmd])
 
-    def _send_rstudio_safari(self, cmd):
+    def _send_safari_rstudio(self, cmd):
         cmd = self.clean_cmd(cmd)
         cmd = self.escape_dquote(cmd)
         cmd = cmd.replace("\n", r"\n")
@@ -133,16 +131,25 @@ class TextSender:
                     var input = document.getElementById('rstudio_console_input');
                     var textarea = input.getElementsByTagName('textarea')[0];
                     textarea.value += \\"" & item 1 of argv & "\\";
-
                     var e = document.createEvent('KeyboardEvent');
                     e.initKeyboardEvent('input');
                     textarea.dispatchEvent(e);
-
                     var e = document.createEvent('KeyboardEvent');
                     e.initKeyboardEvent('keydown');
                     Object.defineProperty(e, 'keyCode', {'value' : 13});
                     input.dispatchEvent(e);
                 "
+            end tell
+        end run
+        """
+        subprocess.call(['osascript', '-e', script, cmd])
+
+    def _send_rstudio(self, cmd):
+        cmd = self.clean_cmd(cmd)
+        script = """
+        on run argv
+            tell application "RStudio"
+                cmd item 1 of argv
             end tell
         end run
         """
@@ -171,6 +178,15 @@ class TextSender:
         elif prog == 'iTerm':
             self._send_text_iterm(cmd)
 
+        elif prog == "RStudio":
+            self._send_rstudio(cmd)
+
+        elif prog == "Chrome-RStudio":
+            self._send_chrome_rstudio(cmd)
+
+        elif prog == "RStudio":
+            self._send_safari_rstudio(cmd)
+
         elif prog == "tmux":
             self._send_text_tmux(cmd, sget("tmux", "tmux"))
 
@@ -179,12 +195,6 @@ class TextSender:
 
         elif prog == "SublimeREPL":
             self._send_text_sublime_repl(cmd)
-
-        elif prog == "RStudio-Chrome":
-            self._send_rstudio_chrome(cmd)
-
-        elif prog == "RStudio-Safari":
-            self._send_rstudio_safari(cmd)
 
         elif prog == "Cygwin":
             self._send_text_ahk(cmd, "", "Cygwin.ahk")
@@ -378,7 +388,7 @@ class SendTextPlusChooseProgramCommand(sublime_plugin.WindowCommand):
         plat = sublime.platform()
         if plat == 'osx':
             self.app_list = ["Terminal", "iTerm", "tmux", "screen",
-                             "RStudio-Safari", "RStudio-Chrome", "SublimeREPL"]
+                             "RStudio", "Chrome-RStudio", "Safari-RStudio", "SublimeREPL"]
         elif plat == "windows":
             self.app_list = ["Cmder", "Cygwin", "SublimeREPL"]
         elif plat == "linux":
