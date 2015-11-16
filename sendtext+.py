@@ -66,35 +66,16 @@ class TextSender:
                 self.escape_dquote(cmd) + '"'
             ])
 
-    def _send_text_tmux(self, cmd, tmux="tmux"):
-        cmd = self.clean_cmd(cmd) + "\n"
-        n = 200
-        chunks = [cmd[i:i+n] for i in range(0, len(cmd), n)]
-        for chunk in chunks:
-            subprocess.call([tmux, 'set-buffer', chunk])
-            subprocess.call([tmux, 'paste-buffer', '-d'])
-
-    def _send_text_screen(self, cmd, screen="screen"):
-        plat = sys.platform
-        cmd = self.clean_cmd(cmd) + "\n"
-        n = 200
-        chunks = [cmd[i:i+n] for i in range(0, len(cmd), n)]
-        for chunk in chunks:
-            if plat.startswith("linux"):
-                chunk = chunk.replace("\\", r"\\")
-                chunk = chunk.replace("$", r"\$")
-            subprocess.call([screen, '-X', 'stuff', chunk])
-
-    def _send_text_ahk(self, cmd, progpath="", script="Rgui.ahk"):
+    def _send_rstudio(self, cmd):
         cmd = self.clean_cmd(cmd)
-        ahk_path = os.path.join(sublime.packages_path(),
-                                'User', 'SendText+', 'bin', 'AutoHotkeyU32')
-        ahk_script_path = os.path.join(sublime.packages_path(),
-                                       'User', 'SendText+', 'bin', script)
-        # manually add "\n" to keep the indentation of first line of block code,
-        # "\n" is later removed in AutoHotkey script
-        cmd = "\n" + cmd
-        subprocess.Popen([ahk_path, ahk_script_path, progpath, cmd])
+        script = """
+        on run argv
+            tell application "RStudio"
+                cmd item 1 of argv
+            end tell
+        end run
+        """
+        subprocess.call(['osascript', '-e', script, cmd])
 
     def _send_chrome_rstudio(self, cmd):
         cmd = self.clean_cmd(cmd)
@@ -147,17 +128,6 @@ class TextSender:
         """
         subprocess.call(['osascript', '-e', script, cmd])
 
-    def _send_rstudio(self, cmd):
-        cmd = self.clean_cmd(cmd)
-        script = """
-        on run argv
-            tell application "RStudio"
-                cmd item 1 of argv
-            end tell
-        end run
-        """
-        subprocess.call(['osascript', '-e', script, cmd])
-
     def _send_text_chrome_jupyter(self, cmd):
         # remove possible ipython code block
         cmd = re.sub(r"%cpaste\n(.*)\n--", r"\1", cmd, flags=re.S)
@@ -201,6 +171,36 @@ class TextSender:
         end run
         """
         subprocess.call(['osascript', '-e', script, cmd])
+
+    def _send_text_tmux(self, cmd, tmux="tmux"):
+        cmd = self.clean_cmd(cmd) + "\n"
+        n = 200
+        chunks = [cmd[i:i+n] for i in range(0, len(cmd), n)]
+        for chunk in chunks:
+            subprocess.call([tmux, 'set-buffer', chunk])
+            subprocess.call([tmux, 'paste-buffer', '-d'])
+
+    def _send_text_screen(self, cmd, screen="screen"):
+        plat = sys.platform
+        cmd = self.clean_cmd(cmd) + "\n"
+        n = 200
+        chunks = [cmd[i:i+n] for i in range(0, len(cmd), n)]
+        for chunk in chunks:
+            if plat.startswith("linux"):
+                chunk = chunk.replace("\\", r"\\")
+                chunk = chunk.replace("$", r"\$")
+            subprocess.call([screen, '-X', 'stuff', chunk])
+
+    def _send_text_ahk(self, cmd, progpath="", script="Rgui.ahk"):
+        cmd = self.clean_cmd(cmd)
+        ahk_path = os.path.join(sublime.packages_path(),
+                                'User', 'SendText+', 'bin', 'AutoHotkeyU32')
+        ahk_script_path = os.path.join(sublime.packages_path(),
+                                       'User', 'SendText+', 'bin', script)
+        # manually add "\n" to keep the indentation of first line of block code,
+        # "\n" is later removed in AutoHotkey script
+        cmd = "\n" + cmd
+        subprocess.Popen([ahk_path, ahk_script_path, progpath, cmd])
 
     def _send_text_sublime_repl(self, cmd):
         cmd = self.clean_cmd(cmd)
@@ -246,14 +246,14 @@ class TextSender:
         elif prog == "screen":
             self._send_text_screen(cmd, sget("screen", "screen"))
 
-        elif prog == "SublimeREPL":
-            self._send_text_sublime_repl(cmd)
-
         elif prog == "Cygwin":
             self._send_text_ahk(cmd, "", "Cygwin.ahk")
 
         elif prog == "Cmder":
             self._send_text_ahk(cmd, "", "Cmder.ahk")
+
+        elif prog == "SublimeREPL":
+            self._send_text_sublime_repl(cmd)
 
 
 class TextGetter:
