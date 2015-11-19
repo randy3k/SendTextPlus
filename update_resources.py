@@ -5,11 +5,11 @@ import shutil
 
 def update_resources(binname):
     # from https://github.com/weslly/ColorPicker/blob/master/sublimecp.py
-    targetdir = os.path.join(sublime.packages_path(), 'User', 'SendText', 'bin')
+    targetdir = os.path.join(sublime.packages_path(), 'User', 'SendText+', 'bin')
     targetpath = os.path.join(targetdir, binname)
-    respath = 'Packages/SendText/bin/' + binname
-    pkgpath = os.path.join(sublime.installed_packages_path(), 'SendText.sublime-package')
-    unpkgpath = os.path.join(sublime.packages_path(), 'SendText', 'bin', binname)
+    respath = 'Packages/SendText+/bin/' + binname
+    pkgpath = os.path.join(sublime.installed_packages_path(), 'SendText+.sublime-package')
+    unpkgpath = os.path.join(sublime.packages_path(), 'SendText+', 'bin', binname)
 
     if os.path.exists(targetpath):
         targetinfo = os.stat(targetpath)
@@ -44,11 +44,3 @@ def plugin_loaded():
         update_resources("AutoHotkeyU32.exe")
         update_resources("Cmder.ahk")
         update_resources("Cygwin.ahk")
-
-    # read old settings
-    s = sublime.load_settings("SendText+.sublime-settings")
-    t = sublime.load_settings("SendTextPlus.sublime-settings")
-    oldprog = t.get("default").get(sublime.platform()).get("prog")
-    if s.get("prog") is None and oldprog is not None:
-        s.set("prog", oldprog)
-    sublime.save_settings("SendText+.sublime-settings")
