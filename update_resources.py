@@ -44,3 +44,4 @@ def plugin_loaded():
         update_resources("AutoHotkeyU32.exe")
         update_resources("Cmder.ahk")
         update_resources("Cygwin.ahk")
+        update_resources("RStudio.ahk")
