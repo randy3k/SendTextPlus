@@ -223,7 +223,7 @@ class TextSender:
             subprocess.call([screen, '-X', 'stuff', chunk])
 
     @staticmethod
-    def execulte_ahk_script(script, cmd, args=[]):
+    def execute_ahk_script(script, cmd, args=[]):
         ahk_path = os.path.join(sublime.packages_path(),
                                 'User', 'SendText+', 'bin', 'AutoHotkeyU32')
         ahk_script_path = os.path.join(sublime.packages_path(),
@@ -235,11 +235,11 @@ class TextSender:
 
     def _dispatch_cygwin(self, cmd):
         cmd = self.clean_cmd(cmd)
-        self.execulte_ahk_script("Cygwin.ahk", cmd)
+        self.execute_ahk_script("Cygwin.ahk", cmd)
 
     def _dispatch_cmder(self, cmd):
         cmd = self.clean_cmd(cmd)
-        self.execulte_ahk_script("Cmder.ahk", cmd)
+        self.execute_ahk_script("Cmder.ahk", cmd)
 
     def _dispatch_sublimerepl(self, cmd):
         cmd = self.clean_cmd(cmd)
