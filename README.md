@@ -81,4 +81,4 @@ Then, launch `SendText+: Choose Program` in command palatte and select `[Default
 
 - R blocks are detected by a regular expression for  `{`,`}` pairs. 
 - Julia blocks are detected by `begin`, `end` pairs and indentations. 
-- Python blocks are detected by indentations.
+- Python blocks are detected by indentations or by `# %%`/`# In[]` decorators.
