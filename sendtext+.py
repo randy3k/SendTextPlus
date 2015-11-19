@@ -241,6 +241,10 @@ class TextSender:
         cmd = self.clean_cmd(cmd)
         self.execute_ahk_script("Cmder.ahk", cmd)
 
+    def _dispatch_rstudio_windows(self, cmd):
+        cmd = self.clean_cmd(cmd)
+        self.execute_ahk_script("RStudio.ahk", cmd)
+
     def _dispatch_sublimerepl(self, cmd):
         cmd = self.clean_cmd(cmd)
         window = sublime.active_window()
@@ -443,7 +447,7 @@ class SendTextPlusChooseProgramCommand(sublime_plugin.WindowCommand):
                              "Safari-RStudio", "Safari-Jupyter",
                              "tmux", "screen", "SublimeREPL"]
         elif plat == "windows":
-            self.app_list = ["[Defaults]", "Cmder", "Cygwin", "SublimeREPL"]
+            self.app_list = ["[Defaults]", "Cmder", "Cygwin", "RStudio", "SublimeREPL"]
         elif plat == "linux":
             self.app_list = ["[Defaults]", "tmux", "screen", "SublimeREPL"]
         else:
