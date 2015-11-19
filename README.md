@@ -31,6 +31,46 @@ Via Package Control.
 
     SendTextPlus uses Sublime build system to source files, you might have to choose the `SendTextPlus` build system before pressing the keys.
 
+### Platform and syntax specific settings.
+You can change the default settings at `Preferences` -> `Package Settings` -> `SendText+`.
+It understands platform and syntax specifications. The list of supported programs are
+
+- Terminal, iTerm
+- tmux, screen,
+- Cmder, Cygwin
+- SublimeREPL; 
+- RStudio, Chrome-RStudio, Chrome-Jupyter, Safari-RStudio, Safari-Jupyter
+
+```json
+{
+    "defaults" : [
+        {
+            "platform": "osx",
+            "scopes": ["source.r"],
+            "prog": "RStudio"
+        },
+        {
+            "platform": "osx",
+            "scopes": ["source.python", "source.julia"],
+            "prog": "Chrome-Jupyter"
+        },
+        {
+            "platform": "osx",
+            "prog": "Terminal"
+        },
+        {
+            "platform": "window",
+            "prog": "Cmder"
+        },
+        {
+            "platform": "linux",
+            "prog": "tmux"
+        }
+    ]
+}
+```
+Then, launch `SendText+: Choose Program` in command palatte and select `[Defaults]`.
+
 ### Cmder settings
 
 - Go to `Paste` in the settings, uncheck, "Confirm <enter> keypress" and "Confirm pasting more than..."

@@ -3,7 +3,6 @@ import sublime_plugin
 import os
 import re
 import subprocess
-import sys
 
 
 def sget(key, default=None):
@@ -11,7 +10,37 @@ def sget(key, default=None):
     return s.get(key, default)
 
 
+def get_program(view):
+    plat = sublime.platform()
+    prog = sget("prog")
+    if prog:
+        return prog
+    defaults = sget("defaults")
+    pt = view.sel()[0].begin() if len(view.sel()) > 0 else 0
+
+    for d in defaults:
+        match_platform = plat == d.get("platform", plat)
+        scopes = d.get("scopes", None)
+        match_scopes = not scopes or any([view.score_selector(pt, s) > 0 for s in scopes])
+        if match_platform and match_scopes and "prog" in d:
+            return d.get("prog")
+    return None
+
+
 class TextSender:
+
+    def __init__(self, view):
+        self.view = view
+        plat = sublime.platform()
+        prog = get_program(view)
+        function_str = "_dispatch_" + prog.lower().replace("-", "_")
+        if getattr(self, function_str + "_" + plat, None):
+            function_str = function_str + "_" + plat
+        self.send_text = eval("self." + function_str)
+
+    @classmethod
+    def init(cls, view):
+        return cls(view)
 
     @staticmethod
     def clean_cmd(cmd):
@@ -27,13 +56,7 @@ class TextSender:
         cmd = cmd.replace('"', '\\"')
         return cmd
 
-    @staticmethod
-    def iterm_version():
-        args = ['osascript', '-e', 'tell application "iTerm" to get version']
-        ver = subprocess.check_output(args).decode().strip()
-        return tuple((int(i) for i in re.split(r"\.", ver)[0:2]))
-
-    def _send_text_terminal(self, cmd):
+    def _dispatch_terminal(self, cmd):
         cmd = self.clean_cmd(cmd)
         cmd = self.escape_dquote(cmd)
         args = ['osascript']
@@ -41,7 +64,13 @@ class TextSender:
                      'tell application "Terminal" to do script "' + cmd + '" in front window'])
         subprocess.Popen(args)
 
-    def _send_text_iterm(self, cmd):
+    @staticmethod
+    def iterm_version():
+        args = ['osascript', '-e', 'tell application "iTerm" to get version']
+        ver = subprocess.check_output(args).decode().strip()
+        return tuple((int(i) for i in re.split(r"\.", ver)[0:2]))
+
+    def _dispatch_iterm(self, cmd):
         cmd = self.clean_cmd(cmd)
         if self.iterm_version() >= (2, 9):
             n = 1000
@@ -66,7 +95,7 @@ class TextSender:
                 self.escape_dquote(cmd) + '"'
             ])
 
-    def _send_rstudio(self, cmd):
+    def _dispatch_rstudio_osx(self, cmd):
         cmd = self.clean_cmd(cmd)
         script = """
         on run argv
@@ -77,7 +106,7 @@ class TextSender:
         """
         subprocess.call(['osascript', '-e', script, cmd])
 
-    def _send_chrome_rstudio(self, cmd):
+    def _dispatch_chrome_rstudio(self, cmd):
         cmd = self.clean_cmd(cmd)
         cmd = self.escape_dquote(cmd)
         cmd = cmd.replace("\n", r"\n")
@@ -104,7 +133,7 @@ class TextSender:
         """
         subprocess.call(['osascript', '-e', script, cmd])
 
-    def _send_safari_rstudio(self, cmd):
+    def _dispatch_safari_rstudio(self, cmd):
         cmd = self.clean_cmd(cmd)
         cmd = self.escape_dquote(cmd)
         cmd = cmd.replace("\n", r"\n")
@@ -128,7 +157,7 @@ class TextSender:
         """
         subprocess.call(['osascript', '-e', script, cmd])
 
-    def _send_text_chrome_jupyter(self, cmd):
+    def _dispatch_chrome_jupyter(self, cmd):
         # remove possible ipython code block
         cmd = re.sub(r"%cpaste\n(.*)\n--", r"\1", cmd, flags=re.S)
         cmd = self.clean_cmd(cmd)
@@ -150,7 +179,7 @@ class TextSender:
         """
         subprocess.call(['osascript', '-e', script, cmd])
 
-    def _send_text_safari_jupyter(self, cmd):
+    def _dispatch_safari_jupyter(self, cmd):
         # remove possible ipython code block
         cmd = re.sub(r"%cpaste\n(.*)\n--", r"\1", cmd, flags=re.S)
         cmd = self.clean_cmd(cmd)
@@ -172,7 +201,8 @@ class TextSender:
         """
         subprocess.call(['osascript', '-e', script, cmd])
 
-    def _send_text_tmux(self, cmd, tmux="tmux"):
+    def _dispatch_tmux(self, cmd):
+        tmux = sget("tmux", "tmux")
         cmd = self.clean_cmd(cmd) + "\n"
         n = 200
         chunks = [cmd[i:i+n] for i in range(0, len(cmd), n)]
@@ -180,19 +210,20 @@ class TextSender:
             subprocess.call([tmux, 'set-buffer', chunk])
             subprocess.call([tmux, 'paste-buffer', '-d'])
 
-    def _send_text_screen(self, cmd, screen="screen"):
-        plat = sys.platform
+    def _dispatch_screen(self, cmd):
+        screen = sget("screen", "screen")
+        plat = sublime.platform()
         cmd = self.clean_cmd(cmd) + "\n"
         n = 200
         chunks = [cmd[i:i+n] for i in range(0, len(cmd), n)]
         for chunk in chunks:
-            if plat.startswith("linux"):
+            if plat == "linux":
                 chunk = chunk.replace("\\", r"\\")
                 chunk = chunk.replace("$", r"\$")
             subprocess.call([screen, '-X', 'stuff', chunk])
 
-    def _send_text_ahk(self, cmd, progpath="", script="Rgui.ahk"):
-        cmd = self.clean_cmd(cmd)
+    @staticmethod
+    def execulte_ahk_script(script, cmd, args=[]):
         ahk_path = os.path.join(sublime.packages_path(),
                                 'User', 'SendText+', 'bin', 'AutoHotkeyU32')
         ahk_script_path = os.path.join(sublime.packages_path(),
@@ -200,9 +231,17 @@ class TextSender:
         # manually add "\n" to keep the indentation of first line of block code,
         # "\n" is later removed in AutoHotkey script
         cmd = "\n" + cmd
-        subprocess.Popen([ahk_path, ahk_script_path, progpath, cmd])
+        subprocess.Popen([ahk_path, ahk_script_path, cmd] + args)
 
-    def _send_text_sublime_repl(self, cmd):
+    def _dispatch_cygwin(self, cmd):
+        cmd = self.clean_cmd(cmd)
+        self.execulte_ahk_script("Cygwin.ahk", cmd)
+
+    def _dispatch_cmder(self, cmd):
+        cmd = self.clean_cmd(cmd)
+        self.execulte_ahk_script("Cmder.ahk", cmd)
+
+    def _dispatch_sublimerepl(self, cmd):
         cmd = self.clean_cmd(cmd)
         window = sublime.active_window()
         view = window.active_view()
@@ -210,56 +249,25 @@ class TextSender:
         window.run_command(
             "repl_send", {"external_id": external_id, "text": cmd})
 
-    def send_text(self, cmd):
-        plat = sublime.platform()
-        if plat == "osx":
-            prog = sget("prog", "Terminal")
-        if plat == "windows":
-            prog = sget("prog", "Cmder")
-        if plat == "linux":
-            prog = sget("prog", "tmux")
-
-        if prog == 'Terminal':
-            self._send_text_terminal(cmd)
-
-        elif prog == 'iTerm':
-            self._send_text_iterm(cmd)
-
-        elif prog == "RStudio":
-            self._send_rstudio(cmd)
-
-        elif prog == "Chrome-RStudio":
-            self._send_chrome_rstudio(cmd)
-
-        elif prog == "RStudio":
-            self._send_safari_rstudio(cmd)
-
-        elif prog == 'Chrome-Jupyter':
-            self._send_text_chrome_jupyter(cmd)
-
-        elif prog == 'Safari-Jupyter':
-            self._send_text_safari_jupyter(cmd)
-
-        elif prog == "tmux":
-            self._send_text_tmux(cmd, sget("tmux", "tmux"))
-
-        elif prog == "screen":
-            self._send_text_screen(cmd, sget("screen", "screen"))
-
-        elif prog == "Cygwin":
-            self._send_text_ahk(cmd, "", "Cygwin.ahk")
-
-        elif prog == "Cmder":
-            self._send_text_ahk(cmd, "", "Cmder.ahk")
-
-        elif prog == "SublimeREPL":
-            self._send_text_sublime_repl(cmd)
-
 
 class TextGetter:
 
     def __init__(self, view):
         self.view = view
+
+    @classmethod
+    def init(cls, view):
+        pt = view.sel()[0].begin() if len(view.sel()) > 0 else 0
+        if view.score_selector(pt, "source.r"):
+            getter = RTextGetter(view)
+        elif view.score_selector(pt, "source.python"):
+            getter = PythonTextGetter(view)
+        elif view.score_selector(pt, "source.julia"):
+            getter = JuliaTextGetter(view)
+        else:
+            getter = cls(view)
+
+        return getter
 
     def expand_line(self, s):
         return self.view.line(s)
@@ -364,19 +372,9 @@ class SendTextPlusCommand(sublime_plugin.TextCommand):
 
     def run(self, edit):
         view = self.view
-        pt = view.sel()[0].begin() if len(view.sel()) > 0 else 0
-        if view.score_selector(pt, "source.r"):
-            getter = RTextGetter(view)
-        elif view.score_selector(pt, "source.python"):
-            getter = PythonTextGetter(view)
-        elif view.score_selector(pt, "source.julia"):
-            getter = JuliaTextGetter(view)
-        else:
-            getter = TextGetter(view)
-
+        getter = TextGetter.init(view)
         cmd = getter.get_text()
-
-        sender = TextSender()
+        sender = TextSender.init(view)
         sender.send_text(cmd)
 
 
@@ -391,7 +389,7 @@ class SendTextPlusChangeDirCommand(sublime_plugin.TextCommand):
 
         dirname = os.path.dirname(fname)
 
-        sender = TextSender()
+        sender = TextSender.init(view)
 
         pt = view.sel()[0].begin() if len(view.sel()) > 0 else 0
         if view.score_selector(pt, "source.r"):
@@ -413,7 +411,7 @@ class SendTextPlusSourceCodeCommand(sublime_plugin.TextCommand):
             sublime.error_message("Save the file!")
             return
 
-        sender = TextSender()
+        sender = TextSender.init(view)
 
         pt = view.sel()[0].begin() if len(view.sel()) > 0 else 0
         if view.score_selector(pt, "source.r"):
@@ -440,14 +438,14 @@ class SendTextPlusChooseProgramCommand(sublime_plugin.WindowCommand):
     def run(self):
         plat = sublime.platform()
         if plat == 'osx':
-            self.app_list = ["Terminal", "iTerm",
+            self.app_list = ["[Defaults]", "Terminal", "iTerm",
                              "RStudio", "Chrome-RStudio", "Chrome-Jupyter",
                              "Safari-RStudio", "Safari-Jupyter",
                              "tmux", "screen", "SublimeREPL"]
         elif plat == "windows":
-            self.app_list = ["Cmder", "Cygwin", "SublimeREPL"]
+            self.app_list = ["[Defaults]", "Cmder", "Cygwin", "SublimeREPL"]
         elif plat == "linux":
-            self.app_list = ["tmux", "screen", "SublimeREPL"]
+            self.app_list = ["[Defaults]", "tmux", "screen", "SublimeREPL"]
         else:
             sublime.error_message("Platform not supported!")
 
@@ -457,5 +455,5 @@ class SendTextPlusChooseProgramCommand(sublime_plugin.WindowCommand):
         if action == -1:
             return
         settings = sublime.load_settings('SendText+.sublime-settings')
-        settings.set("prog", self.app_list[action])
+        settings.set("prog", self.app_list[action] if action > 0 else None)
         sublime.save_settings('SendText+.sublime-settings')

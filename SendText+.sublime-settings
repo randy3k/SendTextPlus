@@ -5,6 +5,24 @@
 
     // auto advance to the next non-empty line.
     // "auto_advance" : true,
-    // prog could be Terminal, iTerm, Cmder, Cygwin, tmux, screen and SublimeREPL, Jupyter (i.e. Ipython Notebook)
-    // "prog" : "Terminal"
+
+    // prog could be Terminal, iTerm, Cmder, Cygwin, tmux, screen,
+    // SublimeREPL; It could be also RStudio, Chrome-RStudio, Chrome-Jupyter,
+    // Safari-RStudio, Safari-Jupyter
+    // "prog" : "Terminal",
+
+    "defaults" : [
+        {
+            "platform": "osx",
+            "prog": "Terminal"
+        },
+        {
+            "platform": "window",
+            "prog": "Cmder"
+        },
+        {
+            "platform": "linux",
+            "prog": "tmux"
+        }
+    ]
 }
