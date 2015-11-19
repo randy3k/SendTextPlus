@@ -327,11 +327,22 @@ class PythonTextGetter(TextGetter):
         view = self.view
         s = view.line(s)
         thiscmd = view.substr(s)
-        if re.match(r"^[ \t]*\S", thiscmd):
+        row = view.rowcol(s.begin())[0]
+        prevline = view.line(s.begin())
+        lastrow = view.rowcol(view.size())[0]
+        if re.match(r"^(#\s%%|#%%|# In\[)", thiscmd):
+            while row < lastrow:
+                row = row + 1
+                line = view.line(view.text_point(row, 0))
+                m = re.match(r"^(#\s%%|#%%|# In\[)", view.substr(line))
+                if m:
+                    s = sublime.Region(s.begin(), prevline.end())
+                    break
+                else:
+                    prevline = line
+
+        elif re.match(r"^[ \t]*\S", thiscmd):
             indentation = re.match(r"^([ \t]*)", thiscmd).group(1)
-            row = view.rowcol(s.begin())[0]
-            prevline = view.line(s.begin())
-            lastrow = view.rowcol(view.size())[0]
             while row < lastrow:
                 row = row + 1
                 line = view.line(view.text_point(row, 0))
@@ -344,8 +355,8 @@ class PythonTextGetter(TextGetter):
                 elif re.match(r"^[ \t]*\S", view.substr(line)):
                     prevline = line
 
-            if row == lastrow:
-                s = sublime.Region(s.begin(), prevline.end())
+        if row == lastrow:
+            s = sublime.Region(s.begin(), prevline.end())
         return s
 
     def get_text(self):
