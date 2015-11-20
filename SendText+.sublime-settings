@@ -3,13 +3,15 @@
     // "tmux" : "tmux",
     // "screen" : "screen",
 
-    // auto advance to the next non-empty line.
-    // "auto_advance" : true,
+    // auto advance to the next line.
+    "auto_advance" : true,
+
+    // auto advance to the next non-empty line. Override to false if "auto_advance" is false.
+    "auto_advance_non_empty": false,
 
     // prog could be Terminal, iTerm, Cmder, Cygwin, tmux, screen,
-    // SublimeREPL; It could be also RStudio, Chrome-RStudio, Chrome-Jupyter,
-    // Safari-RStudio, Safari-Jupyter
-    // "prog" : "Terminal",
+    // SublimeREPL; It could also be RStudio, Chrome-RStudio, Chrome-Jupyter,
+    // Safari-RStudio, Safari-Jupyter.
 
     "defaults" : [
         {
