@@ -95,6 +95,13 @@ class TextSender:
                 self.escape_dquote(cmd) + '"'
             ])
 
+    def _dispatch_r_osx(self, cmd):
+        cmd = self.clean_cmd(cmd)
+        cmd = self.escape_dquote(cmd)
+        args = ['osascript']
+        args.extend(['-e', 'tell application "R" to cmd "' + cmd + '"'])
+        subprocess.Popen(args)
+
     def _dispatch_rstudio_osx(self, cmd):
         cmd = self.clean_cmd(cmd)
         script = """
@@ -240,6 +247,14 @@ class TextSender:
     def _dispatch_cmder(self, cmd):
         cmd = self.clean_cmd(cmd)
         self.execute_ahk_script("Cmder.ahk", cmd)
+
+    def _dispatch_r32_windows(self, cmd):
+        cmd = self.clean_cmd(cmd)
+        self.execute_ahk_script("Rgui.ahk", cmd, [sget("R32", "0")])
+
+    def _dispatch_r64_windows(self, cmd):
+        cmd = self.clean_cmd(cmd)
+        self.execute_ahk_script("Rgui.ahk", cmd, [sget("R64", "1")])
 
     def _dispatch_rstudio_windows(self, cmd):
         cmd = self.clean_cmd(cmd)
@@ -455,11 +470,12 @@ class SendTextPlusChooseProgramCommand(sublime_plugin.WindowCommand):
         plat = sublime.platform()
         if plat == 'osx':
             self.app_list = ["[Defaults]", "Terminal", "iTerm",
-                             "RStudio", "Chrome-RStudio", "Chrome-Jupyter",
+                             "R", "RStudio", "Chrome-RStudio", "Chrome-Jupyter",
                              "Safari-RStudio", "Safari-Jupyter",
                              "tmux", "screen", "SublimeREPL"]
         elif plat == "windows":
-            self.app_list = ["[Defaults]", "Cmder", "Cygwin", "RStudio", "SublimeREPL"]
+            self.app_list = ["[Defaults]", "Cmder", "Cygwin",
+                             "R32", "R64", "RStudio", "SublimeREPL"]
         elif plat == "linux":
             self.app_list = ["[Defaults]", "tmux", "screen", "SublimeREPL"]
         else:

@@ -3,6 +3,10 @@
     // "tmux" : "tmux",
     // "screen" : "screen",
 
+    // path to Rgui.exe (for windows only)
+    // "R32" : "C:\\Program Files\\R\\R-3.1.0\\bin\\i386\\Rgui.exe",
+    // "R64" : "C:\\Program Files\\R\\R-3.1.0\\bin\\x64\\Rgui.exe",
+
     // auto advance to the next line.
     "auto_advance" : true,
 
@@ -12,6 +16,7 @@
     // prog could be Terminal, iTerm, Cmder, Cygwin, tmux, screen,
     // SublimeREPL; It could also be RStudio, Chrome-RStudio, Chrome-Jupyter,
     // Safari-RStudio, Safari-Jupyter.
+    // the order matters, SendText+ will pick the first match out of the list.
 
     "defaults" : [
         {
