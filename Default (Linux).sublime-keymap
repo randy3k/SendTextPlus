@@ -1,7 +1,7 @@
 [
     {
-        "keys": ["ctrl+enter"],
-        "command": "send_text_plus"
+        "keys": ["ctrl+enter"], "command": "send_text_plus",
+        "context": [{"key": "selector", "operator": "equal", "operand": "source"}]
     },
     {
         "keys": ["ctrl+\\"], "command": "send_text_plus_change_dir",
