@@ -45,3 +45,4 @@ def plugin_loaded():
         update_resources("Cmder.ahk")
         update_resources("Cygwin.ahk")
         update_resources("RStudio.ahk")
+        update_resources("Rgui.ahk")
