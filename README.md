@@ -3,9 +3,9 @@
 This package improves [SendText](https://github.com/wch/SendText), particularly for `r`,
 `python` and `julia` syntaxes. It supports 
 
- - Mac: Terminal, iTerm, RStudio(>0.99.769) and Jupyter running on Chrome and Safari
+ - Mac: Terminal, iTerm, RStudio(>0.99.769), R GUI, and Jupyter running on Chrome and Safari
  - Unix: screen and tmux 
- - Windows: [Cmder](http://cmder.net) (see below to configure Cmder), Cygwin and RStudio
+ - Windows: [Cmder](http://cmder.net) (see below to configure Cmder), Cygwin, R32, R64 and RStudio
  - SublimeREPL for R and python syntaxes (it works better with R)
 
 Terminal is the default for Mac, Cmder for Windows and tmux for Linux. To change the default program, launch `SendText+: Choose Program` in command palatte.
@@ -35,11 +35,11 @@ Via Package Control.
 You can change the default settings at `Preferences` -> `Package Settings` -> `SendText+`.
 It understands platform and syntax specifications. The list of supported programs are
 
-- Terminal, iTerm
+- Terminal, iTerm, R
 - tmux, screen,
 - Cmder, Cygwin
 - SublimeREPL; 
-- RStudio, Chrome-RStudio, Chrome-Jupyter, Safari-RStudio, Safari-Jupyter
+- RStudio, R64, R32, Chrome-RStudio, Chrome-Jupyter, Safari-RStudio, Safari-Jupyter
 
 ```json
 {
