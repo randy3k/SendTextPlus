@@ -59,7 +59,7 @@ It understands platform and syntax specifications. The list of supported program
             "prog": "Terminal"
         },
         {
-            "platform": "window",
+            "platform": "windows",
             "prog": "Cmder"
         },
         {

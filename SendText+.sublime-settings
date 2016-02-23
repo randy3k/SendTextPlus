@@ -24,7 +24,7 @@
             "prog": "Terminal"
         },
         {
-            "platform": "window",
+            "platform": "windows",
             "prog": "Cmder"
         },
         {
