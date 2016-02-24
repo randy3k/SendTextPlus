@@ -379,7 +379,7 @@ class PythonTextGetter(TextGetter):
         cmd = super(PythonTextGetter, self).get_text()
         cmd = cmd.rstrip("\n")
         if len(re.findall("\n", cmd)) > 0:
-            cmd = "%cpaste\n" + cmd + "\n--"
+            cmd = "%cpaste -q\n" + cmd + "\n--"
         return cmd
 
 
