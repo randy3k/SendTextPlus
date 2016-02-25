@@ -77,7 +77,7 @@ It is fairly easy to create your own keybinds for commands which you frequently 
 SendTextPlus understands the following variables in the `cmd` field: 
 
 - `$file`, the full path to the file
-- `$file_path$`, the directory contains the file
+- `$file_path`, the directory contains the file
 - `$file_name`, the file name
 - `$file_basename`, the file name without extension
 - `$file_extension`, the file extension
