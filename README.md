@@ -1,16 +1,14 @@
 # SendText+ for Sublime Text
 
-This package improves [SendText](https://github.com/wch/SendText), particularly for `r`,
-`python` and `julia` syntaxes. It supports 
+This package improves [SendText](https://github.com/wch/SendText), particularly for `r`, `python` and `julia` syntaxes (Note: [IPython](https://ipython.org) is assumed for python codes.). It supports
 
- - Mac: Terminal, iTerm, RStudio(>0.99.769), R GUI, and Jupyter running on Chrome and Safari
- - Unix: screen and tmux 
- - Windows: [Cmder](http://cmder.net) (see below to configure Cmder), Cygwin, R32, R64 and RStudio
- - SublimeREPL for R and python syntaxes (it works better with R)
+- Mac: Terminal, iTerm, RStudio(>0.99.769), R GUI, and Jupyter running on Chrome and Safari
+- Linux: screen and tmux
+- Windows: Cmder (see below to configure Cmder), Cygwin, R32, R64 and RStudio
+- SublimeREPL for R and python syntaxes (it works better with R)
 
-Terminal is the default for Mac, Cmder for Windows and tmux for Linux. To change the default program, launch `SendText+: Choose Program` in command palatte.
+Terminal is the default for Mac, Cmder for Windows and tmux for Linux. Use the command `SendText+: Choose Program` in command palatte to quickly change the active program.
 
-Note: IPython is assumed for python codes.
 
 
 ### Installation
@@ -31,15 +29,17 @@ Via Package Control.
 
     SendTextPlus uses Sublime build system to source files, you might have to choose the `SendTextPlus` build system before pressing the keys.
 
-### Platform and syntax specific settings.
-You can change the default settings at `Preferences` -> `Package Settings` -> `SendText+`.
-It understands platform and syntax specifications. The list of supported programs are
 
-- Terminal, iTerm, R
-- tmux, screen,
-- Cmder, Cygwin
-- SublimeREPL; 
-- RStudio, R64, R32, Chrome-RStudio, Chrome-Jupyter, Safari-RStudio, Safari-Jupyter
+### Platform and syntax specific settings.
+
+You can use different settings for different platforms and syntaxes by editing the default settings at `Preferences` -> `Package Settings` -> `SendText+`. It understands platform and syntax specifications. The list of supported programs are
+
+- Mac: Terminal, iTerm, R, RStudio, Chrome-RStudio, Chrome-Jupyter, Safari-RStudio, Safari-Jupyter
+- Liniux: tmux, screen,
+- Windows: Cmder, Cygwin, R64, R32, RStudio
+- or SublimeREPL
+
+An example:
 
 ```json
 {
@@ -69,7 +69,7 @@ It understands platform and syntax specifications. The list of supported program
     ]
 }
 ```
-Then, launch `SendText+: Choose Program` in command palatte and select `[Defaults]`.
+Make sure [Defaults] is selected in `SendText+: Choose Program`.
 
 ### Cmder settings
 
@@ -77,7 +77,7 @@ Then, launch `SendText+: Choose Program` in command palatte and select `[Default
 - Change the default paste all lines command from <kbd>shift</kbd>+<kbd>insert</kbd> to <kbd>ctrl</kbd>+<kbd>shift</kbd>+<kbd>v</kbd>.  I actually posted an [issue](https://github.com/cmderdev/cmder/issues/710) at Cmder about the default keybind.
 
 
-### Some Details
+### Some details about block detection
 
 - R blocks are detected by a regular expression for  `{`,`}` pairs. 
 - Julia blocks are detected by `begin`, `end` pairs and indentations. 
