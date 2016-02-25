@@ -171,7 +171,7 @@ class TextSender:
 
     def _dispatch_chrome_jupyter(self, cmd):
         # remove possible ipython code block
-        cmd = re.sub(r"%cpaste\n(.*)\n--", r"\1", cmd, flags=re.S)
+        cmd = re.sub(r"%cpaste -q\n(.*)\n--", r"\1", cmd, flags=re.S)
         cmd = self.clean_cmd(cmd)
         cmd = self.escape_dquote(cmd)
         cmd = cmd.replace("\n", r"\n")
@@ -193,7 +193,7 @@ class TextSender:
 
     def _dispatch_safari_jupyter(self, cmd):
         # remove possible ipython code block
-        cmd = re.sub(r"%cpaste\n(.*)\n--", r"\1", cmd, flags=re.S)
+        cmd = re.sub(r"%cpaste -q\n(.*)\n--", r"\1", cmd, flags=re.S)
         cmd = self.clean_cmd(cmd)
         cmd = self.escape_dquote(cmd)
         cmd = cmd.replace("\n", r"\n")
