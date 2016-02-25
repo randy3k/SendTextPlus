@@ -10,7 +10,13 @@ def escape_dquote(cmd):
     return cmd
 
 
-class SendTextPlusCommand(sublime_plugin.TextCommand):
+class SendTextPlusCommand(sublime_plugin.WindowCommand):
+
+    def run(self, cmd=None):
+        self.window.active_view().run_command("send_text_plus_internal", {"cmd": cmd})
+
+
+class SendTextPlusInternalCommand(sublime_plugin.TextCommand):
 
     def resolve(self, cmd):
         view = self.view
@@ -47,12 +53,6 @@ class SendTextPlusCommand(sublime_plugin.TextCommand):
             cmd = getter.get_text()
             sender = TextSender.init(view)
             sender.send_text(cmd)
-
-
-class SendTextPlus(sublime_plugin.WindowCommand):
-
-    def run(self, cmd):
-        self.window.active_view().run_command("send_text_plus", {"cmd": cmd})
 
 
 class SendTextPlusChooseProgramCommand(sublime_plugin.WindowCommand):
