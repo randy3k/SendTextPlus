@@ -1,21 +1,33 @@
 [
     {
         "keys": ["super+enter"], "command": "send_text_plus",
-        "context": [{"key": "selector", "operator": "equal", "operand": "source"}]
+        "context": [
+            { "key": "selector", "operator": "equal", "operand": "source" },
+            { "key": "send_text_plus_keybinds", "operator": "equal", "operand": true },
+        ]
     },
     {
         "keys": ["super+\\"], "command": "send_text_plus",
         "args": {"cmd": "setwd(\"$file_path\")"},
-        "context": [{"key": "selector", "operator": "equal", "operand": "source.r"}]
+        "context": [
+            { "key": "selector", "operator": "equal", "operand": "source.r" },
+            { "key": "send_text_plus_keybinds", "operator": "equal", "operand": true },
+        ]
     },
     {
         "keys": ["super+\\"], "command": "send_text_plus",
         "args": {"cmd": "%cd \"$file_path\""},
-        "context": [{"key": "selector", "operator": "equal", "operand": "source.python"}]
+        "context": [
+            { "key": "selector", "operator": "equal", "operand": "source.python" },
+            { "key": "send_text_plus_keybinds", "operator": "equal", "operand": true },
+        ]
     },
     {
         "keys": ["super+\\"], "command": "send_text_plus",
         "args": {"cmd": "cd(\"$file_path\")"},
-        "context": [{"key": "selector", "operator": "equal", "operand": "source.julia"}]
+        "context": [
+            { "key": "selector", "operator": "equal", "operand": "source.julia" },
+            { "key": "send_text_plus_keybinds", "operator": "equal", "operand": true },
+        ]
     }
 ]

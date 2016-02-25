@@ -31,5 +31,8 @@
             "platform": "linux",
             "prog": "tmux"
         }
-    ]
+    ],
+
+    // enable or disable SendText+ keybinds
+    "send_text_plus_keybinds": true
 }

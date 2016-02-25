@@ -83,3 +83,15 @@ class SendTextPlusChooseProgramCommand(sublime_plugin.WindowCommand):
         settings = sublime.load_settings('SendText+.sublime-settings')
         settings.set("prog", self.app_list[action] if action > 0 else None)
         sublime.save_settings('SendText+.sublime-settings')
+
+
+class SendTextPlusListener(sublime_plugin.EventListener):
+    def on_query_context(self, view, key, operator, operand, match_all):
+        if view.is_scratch() or view.settings().get('is_widget'):
+            return
+        if not view.score_selector(view.sel()[0].end() if len(view.sel()) > 0 else 0,
+                                   "source"):
+            return
+        if key == 'send_text_plus_keybinds':
+            settings = sublime.load_settings('SendText+.sublime-settings')
+            return settings.get("send_text_plus_keybinds", True)
