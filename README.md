@@ -71,6 +71,28 @@ An example:
 ```
 Make sure [Defaults] is selected in `SendText+: Choose Program`.
 
+### Custom Keybind
+
+It is fairly easy to create your own keybinds for commands which you frequently use. For example, the following keybind run the `R` command `source("<the current file>")` in the active program.
+SendTextPlus understands the following variables in the `cmd` field: 
+
+- `$file`, the full path to the file
+- `$file_path$`, the directory contains the file
+- `$file_name`, the file name
+- `$file_basename`, the file name without extension
+- `$file_extension`, the file extension
+- `$project_path`, the active folder, if not found, use the directory of current file
+
+```json
+    {
+        "keys": ["super+shift+a"], "command": "send_text_plus",
+        "args": {"cmd": "source(\"$file\")"},
+        "context": [
+            { "key": "selector", "operator": "equal", "operand": "source.r" }
+        ]
+    },
+```
+
 ### Cmder settings
 
 - Go to `Paste` in the settings, uncheck, "Confirm <enter> keypress" and "Confirm pasting more than..."
