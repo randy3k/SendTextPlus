@@ -1,4 +1,0 @@
-{
-    "target": "send_text_plus_build",
-    "selector": "source.r, source.python, source.julia"
-}

@@ -1,0 +1,5 @@
+{
+    "target": "send_text_plus",
+    "cmd": "%run \"$file\"",
+    "selector": "source.python"
+}

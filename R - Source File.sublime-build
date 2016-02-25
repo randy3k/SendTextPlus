@@ -1,0 +1,5 @@
+{
+    "target": "send_text_plus",
+    "cmd": "source(\"$file\")",
+    "selector": "source.r"
+}

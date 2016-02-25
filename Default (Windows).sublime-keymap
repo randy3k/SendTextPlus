@@ -4,15 +4,18 @@
         "context": [{"key": "selector", "operator": "equal", "operand": "source"}]
     },
     {
-        "keys": ["ctrl+\\"], "command": "send_text_plus_change_dir",
+        "keys": ["ctrl+\\"], "command": "send_text_plus",
+        "args": {"cmd": "setwd(\"$file_path\")"},
         "context": [{"key": "selector", "operator": "equal", "operand": "source.r"}]
     },
     {
-        "keys": ["ctrl+\\"], "command": "send_text_plus_change_dir",
+        "keys": ["ctrl+\\"], "command": "send_text_plus",
+        "args": {"cmd": "%cd \"$file_path\""},
         "context": [{"key": "selector", "operator": "equal", "operand": "source.python"}]
     },
     {
-        "keys": ["ctrl+\\"], "command": "send_text_plus_change_dir",
+        "keys": ["ctrl+\\"], "command": "send_text_plus",
+        "args": {"cmd": "cd(\"$file_path\")"},
         "context": [{"key": "selector", "operator": "equal", "operand": "source.julia"}]
     }
 ]
