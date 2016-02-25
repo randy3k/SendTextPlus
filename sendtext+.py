@@ -424,6 +424,8 @@ class SendTextPlusCommand(sublime_plugin.TextCommand):
             project_path = pd["folders"][0].get("path")
             if project_path:
                 cmd = cmd.replace("$project_path", project_path)
+            elif file and file_path:
+                cmd = cmd.replace("$project_path", file_path)
 
         return cmd
 
