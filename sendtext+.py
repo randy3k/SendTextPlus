@@ -401,12 +401,37 @@ class JuliaTextGetter(TextGetter):
 
 class SendTextPlusCommand(sublime_plugin.TextCommand):
 
-    def run(self, edit):
+    def resolve(self, cmd):
         view = self.view
-        getter = TextGetter.init(view)
-        cmd = getter.get_text()
-        sender = TextSender.init(view)
-        sender.send_text(cmd)
+        file = view.file_name()
+        if file:
+            file_name = os.path.basename(file)
+            file_path = os.path.dirname(file)
+            file_base_name, file_ext = os.path.splitext(file_name)
+            cmd = cmd.replace("$file_path", file_path)
+            cmd = cmd.replace("$file_name", file_name)
+            cmd = cmd.replace("$file_base_name", file_base_name)
+            cmd = cmd.replace("$file_extension", file_ext)
+            cmd = cmd.replace("$file", file)
+
+        pd = view.window().project_data()
+        if pd and "folders" in pd and len(pd["folders"]) > 0:
+            project_path = pd["folders"][0].get("path")
+            if project_path:
+                cmd = cmd.replace("$project_path", project_path)
+
+        return cmd
+
+    def run(self, edit, cmd=None):
+        view = self.view
+        if cmd:
+            sender = TextSender.init(view)
+            sender.send_text(self.resolve(cmd))
+        else:
+            getter = TextGetter.init(view)
+            cmd = getter.get_text()
+            sender = TextSender.init(view)
+            sender.send_text(cmd)
 
 
 class SendTextPlusChangeDirCommand(sublime_plugin.TextCommand):
@@ -423,7 +448,8 @@ class SendTextPlusChangeDirCommand(sublime_plugin.TextCommand):
         sender = TextSender.init(view)
 
         pt = view.sel()[0].begin() if len(view.sel()) > 0 else 0
-        if view.score_selector(pt, "source.r"):
+        if view.score_selector(pt, "source.r, text.tex.latex.rsweave, "
+                               "text.html.markdown.rmarkdown"):
             cmd = "setwd(\"" + sender.escape_dquote(dirname) + "\")"
         elif view.score_selector(pt, "source.python"):
             cmd = "cd \"" + sender.escape_dquote(dirname) + "\""
