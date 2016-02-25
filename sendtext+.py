@@ -5,6 +5,11 @@ import re
 import subprocess
 
 
+RSCOPE = "source.r, text.tex.latex.rsweave, text.html.markdown.rmarkdown"
+PYSCOPE = "source.python"
+JSCOPE = "source.julia"
+
+
 def sget(key, default=None):
     s = sublime.load_settings("SendText+.sublime-settings")
     return s.get(key, default)
@@ -277,11 +282,11 @@ class TextGetter:
     @classmethod
     def init(cls, view):
         pt = view.sel()[0].begin() if len(view.sel()) > 0 else 0
-        if view.score_selector(pt, "source.r"):
+        if view.score_selector(pt, RSCOPE):
             getter = RTextGetter(view)
-        elif view.score_selector(pt, "source.python"):
+        elif view.score_selector(pt, PYSCOPE):
             getter = PythonTextGetter(view)
-        elif view.score_selector(pt, "source.julia"):
+        elif view.score_selector(pt, JSCOPE):
             getter = JuliaTextGetter(view)
         else:
             getter = cls(view)
@@ -448,13 +453,14 @@ class SendTextPlusChangeDirCommand(sublime_plugin.TextCommand):
         sender = TextSender.init(view)
 
         pt = view.sel()[0].begin() if len(view.sel()) > 0 else 0
-        if view.score_selector(pt, "source.r, text.tex.latex.rsweave, "
-                               "text.html.markdown.rmarkdown"):
+        if view.score_selector(pt, RSCOPE):
             cmd = "setwd(\"" + sender.escape_dquote(dirname) + "\")"
-        elif view.score_selector(pt, "source.python"):
+        elif view.score_selector(pt, PYSCOPE):
             cmd = "cd \"" + sender.escape_dquote(dirname) + "\""
-        elif view.score_selector(pt, "source.julia"):
+        elif view.score_selector(pt, JSCOPE):
             cmd = "cd(\"" + sender.escape_dquote(dirname) + "\")"
+        else:
+            sublime.message("This syntax is not supported.")
 
         sender.send_text(cmd+"\n")
 
@@ -471,11 +477,11 @@ class SendTextPlusSourceCodeCommand(sublime_plugin.TextCommand):
         sender = TextSender.init(view)
 
         pt = view.sel()[0].begin() if len(view.sel()) > 0 else 0
-        if view.score_selector(pt, "source.r"):
+        if view.score_selector(pt, RSCOPE):
             cmd = "source(\"" + sender.escape_dquote(fname) + "\")"
-        elif view.score_selector(pt, "source.python"):
+        elif view.score_selector(pt, PYSCOPE):
             cmd = "%run \"" + sender.escape_dquote(fname) + "\""
-        elif view.score_selector(pt, "source.julia"):
+        elif view.score_selector(pt, JSCOPE):
             cmd = "include(\"" + sender.escape_dquote(fname) + "\")"
 
         sender.send_text(cmd+"\n")
