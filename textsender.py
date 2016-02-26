@@ -4,11 +4,6 @@ import re
 import subprocess
 
 
-RSCOPE = "source.r, text.tex.latex.rsweave, text.html.markdown.rmarkdown"
-PYSCOPE = "source.python"
-JSCOPE = "source.julia"
-
-
 def sget(key, default=None):
     s = sublime.load_settings("SendText+.sublime-settings")
     return s.get(key, default)
@@ -33,18 +28,18 @@ def get_program(view):
 
 class TextSender:
 
-    def __init__(self, view):
+    def __init__(self, view, prog=None):
         self.view = view
+        if not prog:
+            prog = get_program(view)
         plat = sublime.platform()
-        prog = get_program(view)
         function_str = "_dispatch_" + prog.lower().replace("-", "_")
         if getattr(self, function_str + "_" + plat, None):
             function_str = function_str + "_" + plat
-        self.send_text = eval("self." + function_str)
+        self._send_text = eval("self." + function_str)
 
-    @classmethod
-    def init(cls, view):
-        return cls(view)
+    def send_text(self, cmd):
+        self._send_text(cmd)
 
     @staticmethod
     def clean_cmd(cmd):
@@ -169,8 +164,6 @@ class TextSender:
         subprocess.call(['osascript', '-e', script, cmd])
 
     def _dispatch_chrome_jupyter(self, cmd):
-        # remove possible ipython code block
-        cmd = re.sub(r"%cpaste -q\n(.*)\n--", r"\1", cmd, flags=re.S)
         cmd = self.clean_cmd(cmd)
         cmd = self.escape_dquote(cmd)
         cmd = cmd.replace("\n", r"\n")
@@ -191,8 +184,6 @@ class TextSender:
         subprocess.call(['osascript', '-e', script, cmd])
 
     def _dispatch_safari_jupyter(self, cmd):
-        # remove possible ipython code block
-        cmd = re.sub(r"%cpaste -q\n(.*)\n--", r"\1", cmd, flags=re.S)
         cmd = self.clean_cmd(cmd)
         cmd = self.escape_dquote(cmd)
         cmd = cmd.replace("\n", r"\n")
@@ -273,131 +264,14 @@ class TextSender:
             "repl_send", {"external_id": external_id, "text": cmd})
 
 
-class TextGetter:
+class PythonTextSender(TextSender):
 
-    def __init__(self, view):
-        self.view = view
+    def send_text(self, cmd):
+        if self._send_text != self._dispatch_chrome_jupyter and \
+                self._send_text != self._dispatch_safari_jupyter:
 
-    @classmethod
-    def init(cls, view):
-        pt = view.sel()[0].begin() if len(view.sel()) > 0 else 0
-        if view.score_selector(pt, RSCOPE):
-            getter = RTextGetter(view)
-        elif view.score_selector(pt, PYSCOPE):
-            getter = PythonTextGetter(view)
-        elif view.score_selector(pt, JSCOPE):
-            getter = JuliaTextGetter(view)
-        else:
-            getter = cls(view)
+            cmd = cmd.rstrip("\n")
+            if len(re.findall("\n", cmd)) > 0:
+                cmd = "%cpaste -q\n" + cmd + "\n--"
 
-        return getter
-
-    def expand_line(self, s):
-        return self.view.line(s)
-
-    def advance(self, s):
-        view = self.view
-        view.sel().subtract(s)
-        pt = view.text_point(view.rowcol(s.end())[0]+1, 0)
-        if sget("auto_advance_non_empty", False):
-            nextpt = view.find(r"\S", pt)
-            if nextpt.begin() != -1:
-                pt = view.text_point(view.rowcol(nextpt.begin())[0], 0)
-        view.sel().add(sublime.Region(pt, pt))
-
-    def get_text(self):
-        view = self.view
-        cmd = ''
-        moved = False
-        for s in [s for s in view.sel()]:
-            if s.empty():
-                s = self.expand_line(s)
-                if sget("auto_advance", True):
-                    self.advance(s)
-                    moved = True
-
-            cmd += view.substr(s) + '\n'
-
-        if moved:
-            view.show(view.sel())
-
-        return cmd
-
-
-class RTextGetter(TextGetter):
-
-    def expand_line(self, s):
-        view = self.view
-        # expand selection to {...}
-        s = view.line(s)
-        thiscmd = view.substr(s)
-        if re.match(r".*\{\s*$", thiscmd):
-            es = view.find(
-                r"""^(?:.*(\{(?:(["\'])(?:[^\\]|\\.)*?\2|#.*$|[^\{\}]|(?1))*\})[^\{\}\n]*)+""",
-                view.line(s).begin()
-            )
-            if s.begin() == es.begin():
-                s = es
-        return s
-
-
-class PythonTextGetter(TextGetter):
-
-    def expand_line(self, s):
-        view = self.view
-        s = view.line(s)
-        thiscmd = view.substr(s)
-        row = view.rowcol(s.begin())[0]
-        prevline = view.line(s.begin())
-        lastrow = view.rowcol(view.size())[0]
-        if re.match(r"^(#\s%%|#%%|# In\[)", thiscmd):
-            while row < lastrow:
-                row = row + 1
-                line = view.line(view.text_point(row, 0))
-                m = re.match(r"^(#\s%%|#%%|# In\[)", view.substr(line))
-                if m:
-                    s = sublime.Region(s.begin(), prevline.end())
-                    break
-                else:
-                    prevline = line
-
-        elif re.match(r"^[ \t]*\S", thiscmd):
-            indentation = re.match(r"^([ \t]*)", thiscmd).group(1)
-            while row < lastrow:
-                row = row + 1
-                line = view.line(view.text_point(row, 0))
-                m = re.match(r"^([ \t]*)([^\n\s]+)", view.substr(line))
-                if m and len(m.group(1)) <= len(indentation) and \
-                        (len(m.group(1)) < len(indentation) or
-                            not re.match(r"else|elif|except|finally", m.group(2))):
-                    s = sublime.Region(s.begin(), prevline.end())
-                    break
-                elif re.match(r"^[ \t]*\S", view.substr(line)):
-                    prevline = line
-
-        if row == lastrow:
-            s = sublime.Region(s.begin(), prevline.end())
-        return s
-
-    def get_text(self):
-        cmd = super(PythonTextGetter, self).get_text()
-        cmd = cmd.rstrip("\n")
-        if len(re.findall("\n", cmd)) > 0:
-            cmd = "%cpaste -q\n" + cmd + "\n--"
-        return cmd
-
-
-class JuliaTextGetter(TextGetter):
-
-    def expand_line(self, s):
-        view = self.view
-        s = view.line(s)
-        thiscmd = view.substr(s)
-        if (re.match(r"^\s*(?:function|if|for|while)", thiscmd) and
-                not re.match(r".*end\s*$", thiscmd)) or \
-                (re.match(r".*begin\s*$", thiscmd)):
-            indentation = re.match("^(\s*)", thiscmd).group(1)
-            end = view.find("^"+indentation+"end", s.begin())
-            s = sublime.Region(s.begin(), view.line(end.end()).end())
-
-        return s
+        TextSender.send_text(self, cmd)
