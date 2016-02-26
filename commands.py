@@ -20,12 +20,6 @@ class SendTextPlusBuild(sublime_plugin.WindowCommand):
 
 class SendTextPlusCommand(sublime_plugin.TextCommand):
 
-    @staticmethod
-    def escape_dquote(cmd):
-        cmd = cmd.replace('\\', '\\\\')
-        cmd = cmd.replace('"', '\\"')
-        return cmd
-
     def resolve(self, cmd):
         view = self.view
         file = view.file_name()
@@ -33,21 +27,21 @@ class SendTextPlusCommand(sublime_plugin.TextCommand):
             file_name = os.path.basename(file)
             file_path = os.path.dirname(file)
             file_base_name, file_ext = os.path.splitext(file_name)
-            cmd = cmd.replace("$file_path", self.escape_dquote(file_path))
-            cmd = cmd.replace("$file_name", self.escape_dquote(file_name))
-            cmd = cmd.replace("$file_base_name", self.escape_dquote(file_base_name))
+            cmd = cmd.replace("$file_path", file_path)
+            cmd = cmd.replace("$file_name", file_name)
+            cmd = cmd.replace("$file_base_name", file_base_name)
             cmd = cmd.replace("$file_extension", file_ext)
-            cmd = cmd.replace("$file", self.escape_dquote(file))
+            cmd = cmd.replace("$file", file)
 
         pd = view.window().project_data()
         if pd and "folders" in pd and len(pd["folders"]) > 0:
             project_path = pd["folders"][0].get("path")
             if project_path:
-                cmd = cmd.replace("$project_path", self.escape_dquote(project_path))
+                cmd = cmd.replace("$project_path", project_path)
 
         # resolve $project_path again
         if file and file_path:
-            cmd = cmd.replace("$project_path", self.escape_dquote(file_path))
+            cmd = cmd.replace("$project_path", file_path)
 
         return cmd
 
