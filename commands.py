@@ -53,7 +53,7 @@ class SendTextPlusInternalCommand(sublime_plugin.TextCommand):
 
     def run(self, edit, cmd=None, prog=None):
         view = self.view
-        pt = view.sel()[0].begin() if len(view.sel()) > 0 else 0
+        pt = view.line(view.sel()[0]).begin() if len(view.sel()) > 0 else 0
 
         if cmd:
             cmd = self.resolve(cmd)
