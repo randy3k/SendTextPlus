@@ -116,9 +116,6 @@ class TextSender:
         cmd = self.clean_cmd(cmd)
         cmd = self.escape_dquote(cmd)
         cmd = cmd.replace("\n", r"\n")
-        # use window.desktopHooks.evaluateRCmd once
-        # https://github.com/rstudio/rstudio/commit/3c11a669e7eaae0af40b935fb22cf1bf0e7d6b73
-        # is released.
         script = """
         on run argv
             tell application "Google Chrome"
