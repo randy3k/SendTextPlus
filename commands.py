@@ -9,16 +9,16 @@ from .textgetter import TextGetter, \
 from .textsender import TextSender, PythonTextSender
 
 
-class SendTextPlusCommand(sublime_plugin.WindowCommand):
+class SendTextPlusBuild(sublime_plugin.WindowCommand):
 
     def run(self, cmd=None, prog=None):
         self.window.active_view().run_command(
-            "send_text_plus_internal",
+            "send_text_plus",
             {"cmd": cmd, "prog": prog}
         )
 
 
-class SendTextPlusInternalCommand(sublime_plugin.TextCommand):
+class SendTextPlusCommand(sublime_plugin.TextCommand):
 
     @staticmethod
     def escape_dquote(cmd):
