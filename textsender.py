@@ -230,11 +230,9 @@ class TextSender:
             cmd = cmd + "\n"
             cb = sublime.get_clipboard()
             sublime.set_clipboard(cmd)
-            # subprocess.check_output(["xdotool", "windowfocus", wid])
-            subprocess.check_output(["xdotool", "key", "--clearmodifiers",
-                                     "--window", wid,
-                                     "v"])
-            # subprocess.check_output(["xdotool", "windowfocus", sid])
+            subprocess.check_output(["xdotool", "windowfocus", wid])
+            subprocess.check_output(["xdotool", "key", "--clearmodifiers", "ctrl+shift+v"])
+            subprocess.check_output(["xdotool", "windowfocus", sid])
             sublime.set_timeout(lambda: sublime.set_clipboard(cb), 2000)
 
     @staticmethod
