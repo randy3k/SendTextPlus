@@ -235,6 +235,18 @@ class TextSender:
             subprocess.check_output(["xdotool", "windowfocus", sid])
             sublime.set_timeout(lambda: sublime.set_clipboard(cb), 2000)
 
+    def _dispatch_rstudio_linux(self, cmd):
+        wid = subprocess.check_output(["xdotool", "search", "--onlyvisible", "--class", "rstudio"])
+        if wid:
+            wid = wid.decode("utf-8").strip().split("\n")[-1]
+            cb = sublime.get_clipboard()
+            sublime.set_clipboard(cmd)
+            subprocess.check_output(["xdotool", "key", "--window", wid,
+                                     "--clearmodifiers", "ctrl+v"])
+            subprocess.check_output(["xdotool", "key", "--window", wid, 
+                                     "--clearmodifiers", "Return"])
+            sublime.set_timeout(lambda: sublime.set_clipboard(cb), 2000)
+
     @staticmethod
     def execute_ahk_script(script, cmd, args=[]):
         ahk_path = os.path.join(sublime.packages_path(),
