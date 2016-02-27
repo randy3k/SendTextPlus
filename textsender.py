@@ -221,6 +221,22 @@ class TextSender:
                 chunk = chunk.replace("$", r"\$")
             subprocess.call([screen, '-X', 'stuff', chunk])
 
+    def _dispatch_gnome_terminal(self, cmd):
+        wid = subprocess.check_output(["xdotool", "search", "--onlyvisible", "--class", "gnome-terminal"])
+        sid = subprocess.check_output(["xdotool", "getactivewindow"]).decode("utf-8").strip()
+        if wid:
+            print(wid)
+            wid = wid.decode("utf-8").strip().split("\n")[-1]
+            cmd = cmd + "\n"
+            cb = sublime.get_clipboard()
+            sublime.set_clipboard(cmd)
+            # subprocess.check_output(["xdotool", "windowfocus", wid])
+            subprocess.check_output(["xdotool", "key", "--clearmodifiers",
+                                     "--window", wid,
+                                     "v"])
+            # subprocess.check_output(["xdotool", "windowfocus", sid])
+            sublime.set_timeout(lambda: sublime.set_clipboard(cb), 2000)
+
     @staticmethod
     def execute_ahk_script(script, cmd, args=[]):
         ahk_path = os.path.join(sublime.packages_path(),

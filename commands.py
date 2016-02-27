@@ -87,7 +87,7 @@ class SendTextPlusChooseProgramCommand(sublime_plugin.WindowCommand):
             self.app_list = ["[Defaults]", "Cmder", "Cygwin",
                              "R32", "R64", "RStudio", "SublimeREPL"]
         elif plat == "linux":
-            self.app_list = ["[Defaults]", "tmux", "screen", "SublimeREPL"]
+            self.app_list = ["[Defaults]", "tmux", "screen", "gnome-terminal", "SublimeREPL"]
         else:
             sublime.error_message("Platform not supported!")
 
