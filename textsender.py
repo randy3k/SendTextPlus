@@ -222,7 +222,8 @@ class TextSender:
             subprocess.call([screen, '-X', 'stuff', chunk])
 
     def _dispatch_gnome_terminal(self, cmd):
-        wid = subprocess.check_output(["xdotool", "search", "--onlyvisible", "--class", "gnome-terminal"])
+        wid = subprocess.check_output(["xdotool", "search", "--onlyvisible",
+                                       "--class", "gnome-terminal"])
         sid = subprocess.check_output(["xdotool", "getactivewindow"]).decode("utf-8").strip()
         if wid:
             print(wid)
@@ -243,7 +244,7 @@ class TextSender:
             sublime.set_clipboard(cmd)
             subprocess.check_output(["xdotool", "key", "--window", wid,
                                      "--clearmodifiers", "ctrl+v"])
-            subprocess.check_output(["xdotool", "key", "--window", wid, 
+            subprocess.check_output(["xdotool", "key", "--window", wid,
                                      "--clearmodifiers", "Return"])
             sublime.set_timeout(lambda: sublime.set_clipboard(cb), 2000)
 
