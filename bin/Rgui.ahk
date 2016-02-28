@@ -25,7 +25,7 @@ if (RprocID == "")
 
 if (RprocID == "")
 {
-    Rguiexe = %2%
+    Rguiexe = %1%
     if (Rguiexe == "1") {
         SetRegView 64
         RegRead, Rhome, HKEY_LOCAL_MACHINE,SOFTWARE\R-core\R, InstallPath
@@ -52,19 +52,6 @@ if (RprocID == "")
 
 Outputdebug % dstring . "RprocID=" . RprocID
 
-oldclipboard = %clipboard%
-
-if 0=2
-{
-    cmd = %1%
-    cmd := RegExReplace(cmd, "^\n", "")
-    newline = `n
-    clipboard := cmd . newline
-}
-else {
-    ; for debug
-    clipboard = proc.time()`n
-}
 WinMenuSelectItem ahk_id %RprocID%,,2&,2& ;edit->paste
+
 WinActivate ahk_id %stID%
-clipboard := oldclipboard

@@ -27,6 +27,7 @@ def get_program(view):
 
 
 class TextSender:
+    cb = None
 
     def __init__(self, view, prog=None):
         self.view = view
@@ -54,6 +55,18 @@ class TextSender:
         cmd = cmd.replace('\\', '\\\\')
         cmd = cmd.replace('"', '\\"')
         return cmd
+
+    @classmethod
+    def set_clipboard(cls, cmd):
+        if not cls.cb:
+            cls.cb = sublime.get_clipboard()
+        sublime.set_clipboard(cmd)
+
+    @classmethod
+    def reset_clipboard(cls):
+        if cls.cb:
+            sublime.set_clipboard(cls.cb)
+        cls.cb = None
 
     def _dispatch_terminal(self, cmd):
         cmd = self.clean_cmd(cmd)
@@ -229,55 +242,62 @@ class TextSender:
             print(wid)
             wid = wid.decode("utf-8").strip().split("\n")[-1]
             cmd = cmd + "\n"
-            cb = sublime.get_clipboard()
-            sublime.set_clipboard(cmd)
+            self.set_clipboard(cmd)
             subprocess.check_output(["xdotool", "windowfocus", wid])
             subprocess.check_output(["xdotool", "key", "--clearmodifiers", "ctrl+shift+v"])
             subprocess.check_output(["xdotool", "windowfocus", sid])
-            sublime.set_timeout(lambda: sublime.set_clipboard(cb), 2000)
+            sublime.set_timeout(self.reset_clipboard, 2000)
 
     def _dispatch_rstudio_linux(self, cmd):
         wid = subprocess.check_output(["xdotool", "search", "--onlyvisible", "--class", "rstudio"])
         if wid:
             wid = wid.decode("utf-8").strip().split("\n")[-1]
-            cb = sublime.get_clipboard()
-            sublime.set_clipboard(cmd)
+            self.set_clipboard(cmd)
             subprocess.check_output(["xdotool", "key", "--window", wid,
                                      "--clearmodifiers", "ctrl+v"])
             subprocess.check_output(["xdotool", "key", "--window", wid,
                                      "--clearmodifiers", "Return"])
-            sublime.set_timeout(lambda: sublime.set_clipboard(cb), 2000)
+            sublime.set_timeout(self.reset_clipboard, 2000)
 
     @staticmethod
-    def execute_ahk_script(script, cmd, args=[]):
+    def execute_ahk_script(script, args=[]):
         ahk_path = os.path.join(sublime.packages_path(),
                                 'User', 'SendText+', 'bin', 'AutoHotkeyU32')
         ahk_script_path = os.path.join(sublime.packages_path(),
                                        'User', 'SendText+', 'bin', script)
-        # manually add "\n" to keep the indentation of first line of block code,
-        # "\n" is later removed in AutoHotkey script
-        cmd = "\n" + cmd
-        subprocess.Popen([ahk_path, ahk_script_path, cmd] + args)
+        subprocess.check_output([ahk_path, ahk_script_path] + args)
+
 
     def _dispatch_cygwin(self, cmd):
-        cmd = self.clean_cmd(cmd)
-        self.execute_ahk_script("Cygwin.ahk", cmd)
+        cmd = self.clean_cmd(cmd) + "\n"
+        self.set_clipboard(cmd)
+        self.execute_ahk_script("Cygwin.ahk")
+        sublime.set_timeout(self.reset_clipboard, 2000)
+
 
     def _dispatch_cmder(self, cmd):
-        cmd = self.clean_cmd(cmd)
-        self.execute_ahk_script("Cmder.ahk", cmd)
+        cmd = self.clean_cmd(cmd) + "\n"
+        self.set_clipboard(cmd)
+        self.execute_ahk_script("Cmder.ahk")
+        sublime.set_timeout(self.reset_clipboard, 2000)
 
     def _dispatch_r32_windows(self, cmd):
-        cmd = self.clean_cmd(cmd)
-        self.execute_ahk_script("Rgui.ahk", cmd, [sget("R32", "0")])
+        cmd = self.clean_cmd(cmd) + "\n"
+        self.set_clipboard(cmd)
+        self.execute_ahk_script("Rgui.ahk", [sget("R32", "0")])
+        sublime.set_timeout(self.reset_clipboard, 2000)
 
     def _dispatch_r64_windows(self, cmd):
-        cmd = self.clean_cmd(cmd)
-        self.execute_ahk_script("Rgui.ahk", cmd, [sget("R64", "1")])
+        cmd = self.clean_cmd(cmd) + "\n"
+        self.set_clipboard(cmd)
+        self.execute_ahk_script("Rgui.ahk", [sget("R64", "1")])
+        sublime.set_timeout(self.reset_clipboard, 2000)
 
     def _dispatch_rstudio_windows(self, cmd):
         cmd = self.clean_cmd(cmd)
-        self.execute_ahk_script("RStudio.ahk", cmd)
+        self.set_clipboard(cmd)
+        self.execute_ahk_script("RStudio.ahk")
+        sublime.set_timeout(self.reset_clipboard, 2000)
 
     def _dispatch_sublimerepl(self, cmd):
         cmd = self.clean_cmd(cmd)
