@@ -3,11 +3,11 @@
 This package improves [SendText](https://github.com/wch/SendText), particularly for `r`, `python` and `julia` syntaxes (Note: [IPython](https://ipython.org) is assumed for python codes.). It supports
 
 - Mac: Terminal, iTerm, RStudio, R GUI, and Jupyter running on Chrome and Safari
-- Linux: gnome-terminal, screen, tmux and RStudio (gnome-terminal and RStudio require `xdotool`, it can be installed via `apt-get install xdotool`)
-- Windows: Cmder (see below to configure Cmder), Cygwin, R32, R64 and RStudio
+- Linux: gnome-terminal, screen, tmux and RStudio. `xdotool` is required for gnome-terminal and RStudio, it can be installed via `apt-get install xdotool`. As gnome-terminal doesn't accept keystrokes while it is not in focus, we need to switch focus temporarily to gnome-terminal in order to send the code.
+- Windows: Cmder (see below to configure Cmder), Cygwin, R32, R64 and RStudio. Due to a strange behavior of RStudio, it doesn't accept the `ctrl-enter` key when there is no source file, so make sure there is at least one (possibly untitled) source file opened.
 - SublimeREPL for R and python syntaxes (it works better with R)
 
-Terminal is the default for Mac, Cmder for Windows and tmux for Linux. Use the command `SendText+: Choose Program` in command palatte to quickly change the active program.
+Terminal is the default for Mac, Cmder for Windows and tmux for Linux. Use the command `SendText+: Choose Program` in command palette to quickly change the active program.
 
 
 
