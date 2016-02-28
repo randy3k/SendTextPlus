@@ -64,9 +64,11 @@ class TextSender:
 
     @classmethod
     def reset_clipboard(cls):
-        if cls.cb:
-            sublime.set_clipboard(cls.cb)
-        cls.cb = None
+        def _reset_clipboard():
+            if cls.cb:
+                sublime.set_clipboard(cls.cb)
+            cls.cb = None
+        sublime.set_timeout(_reset_clipboard, 2000)
 
     def _dispatch_terminal(self, cmd):
         cmd = self.clean_cmd(cmd)
@@ -239,25 +241,25 @@ class TextSender:
                                        "--class", "gnome-terminal"])
         sid = subprocess.check_output(["xdotool", "getactivewindow"]).decode("utf-8").strip()
         if wid:
-            print(wid)
             wid = wid.decode("utf-8").strip().split("\n")[-1]
-            cmd = cmd + "\n"
+            cmd = self.clean_cmd(cmd) + "\n"
             self.set_clipboard(cmd)
             subprocess.check_output(["xdotool", "windowfocus", wid])
             subprocess.check_output(["xdotool", "key", "--clearmodifiers", "ctrl+shift+v"])
             subprocess.check_output(["xdotool", "windowfocus", sid])
-            sublime.set_timeout(self.reset_clipboard, 2000)
+            self.reset_clipboard()
 
     def _dispatch_rstudio_linux(self, cmd):
         wid = subprocess.check_output(["xdotool", "search", "--onlyvisible", "--class", "rstudio"])
         if wid:
             wid = wid.decode("utf-8").strip().split("\n")[-1]
+            cmd = self.clean_cmd(cmd)
             self.set_clipboard(cmd)
             subprocess.check_output(["xdotool", "key", "--window", wid,
                                      "--clearmodifiers", "ctrl+v"])
             subprocess.check_output(["xdotool", "key", "--window", wid,
                                      "--clearmodifiers", "Return"])
-            sublime.set_timeout(self.reset_clipboard, 2000)
+            self.reset_clipboard()
 
     @staticmethod
     def execute_ahk_script(script, args=[]):
@@ -267,37 +269,35 @@ class TextSender:
                                        'User', 'SendText+', 'bin', script)
         subprocess.check_output([ahk_path, ahk_script_path] + args)
 
-
     def _dispatch_cygwin(self, cmd):
         cmd = self.clean_cmd(cmd) + "\n"
         self.set_clipboard(cmd)
         self.execute_ahk_script("Cygwin.ahk")
-        sublime.set_timeout(self.reset_clipboard, 2000)
-
+        self.reset_clipboard()
 
     def _dispatch_cmder(self, cmd):
         cmd = self.clean_cmd(cmd) + "\n"
         self.set_clipboard(cmd)
         self.execute_ahk_script("Cmder.ahk")
-        sublime.set_timeout(self.reset_clipboard, 2000)
+        self.reset_clipboard()
 
     def _dispatch_r32_windows(self, cmd):
         cmd = self.clean_cmd(cmd) + "\n"
         self.set_clipboard(cmd)
         self.execute_ahk_script("Rgui.ahk", [sget("R32", "0")])
-        sublime.set_timeout(self.reset_clipboard, 2000)
+        self.reset_clipboard()
 
     def _dispatch_r64_windows(self, cmd):
         cmd = self.clean_cmd(cmd) + "\n"
         self.set_clipboard(cmd)
         self.execute_ahk_script("Rgui.ahk", [sget("R64", "1")])
-        sublime.set_timeout(self.reset_clipboard, 2000)
+        self.reset_clipboard()
 
     def _dispatch_rstudio_windows(self, cmd):
         cmd = self.clean_cmd(cmd)
         self.set_clipboard(cmd)
         self.execute_ahk_script("RStudio.ahk")
-        sublime.set_timeout(self.reset_clipboard, 2000)
+        self.reset_clipboard()
 
     def _dispatch_sublimerepl(self, cmd):
         cmd = self.clean_cmd(cmd)
