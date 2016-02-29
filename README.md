@@ -82,6 +82,7 @@ SendTextPlus understands the following variables in the `cmd` field:
 - `$file_basename`, the file name without extension
 - `$file_extension`, the file extension
 - `$project_path`, the active folder, if not found, use the directory of current file
+- `$selection`, the text selected, or the word under cursor
 
 ```json
     {

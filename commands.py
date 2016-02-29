@@ -43,6 +43,13 @@ class SendTextPlusCommand(sublime_plugin.TextCommand):
         if file and file_path:
             cmd = cmd.replace("$project_path", file_path)
 
+        if len(view.sel()) == 1:
+            word = view.substr(view.sel()[0])
+            if not word:
+                word = view.substr(view.word(view.sel()[0].begin()))
+
+            cmd = cmd.replace("$selection", word)
+
         return cmd
 
     def run(self, edit, cmd=None, prog=None):
