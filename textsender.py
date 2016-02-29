@@ -295,9 +295,10 @@ class TextSender:
 
     def _dispatch_rstudio_windows(self, cmd):
         cmd = self.clean_cmd(cmd)
-        self.set_clipboard(cmd)
-        self.execute_ahk_script("RStudio.ahk")
-        self.reset_clipboard()
+        if cmd:
+            self.set_clipboard(cmd)
+            self.execute_ahk_script("RStudio.ahk")
+            self.reset_clipboard()
 
     def _dispatch_sublimerepl(self, cmd):
         cmd = self.clean_cmd(cmd)
