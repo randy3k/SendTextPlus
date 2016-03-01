@@ -2,7 +2,14 @@
     {
         "keys": ["ctrl+enter"], "command": "send_text_plus",
         "context": [
-            { "key": "selector", "operator": "equal", "operand": "source, markup.raw.block.fenced.markdown" },
+            { "key": "selector", "operator": "equal", "operand": "source" },
+            { "key": "send_text_plus_keybinds", "operator": "equal", "operand": true }
+        ]
+    },
+    {
+        "keys": ["ctrl+enter"], "command": "send_text_plus",
+        "context": [
+            { "key": "selector", "operator": "equal", "operand": "markup.raw.block.fenced.markdown" },
             { "key": "send_text_plus_keybinds", "operator": "equal", "operand": true }
         ]
     },
