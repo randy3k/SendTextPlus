@@ -27,7 +27,7 @@ Via Package Control.
 
 - <kbd>cmd</kbd>+<kbd>b</kbd> (Mac) or <kbd>ctrl</kbd>+<kbd>b</kbd> (Windows/Linux): source current file (R, Julia and Python only)
 
-    SendTextPlus uses Sublime build system to source files, you might have to choose the `SendTextPlus` build system before pressing the keys.
+    SendTextPlus uses Sublime build system to source files, you might have to choose the `Source File` option in a pop up window.
 
 
 ### Platform and syntax specific settings.
@@ -84,6 +84,8 @@ SendTextPlus understands the following variables in the `cmd` field:
 - `$project_path`, the active folder, if not found, use the directory of current file
 - `$selection`, the text selected, or the word under cursor
 
+An example
+
 ```json
     {
         "keys": ["super+shift+a"], "command": "send_text_plus",
@@ -102,6 +104,7 @@ SendTextPlus understands the following variables in the `cmd` field:
 
 ### Some details about block detection
 
-- R blocks are detected by a regular expression for  `{`,`}` pairs. 
+- R blocks are detected by `{`,`}` pairs. 
 - Julia blocks are detected by `begin`, `end` pairs and indentations. 
 - Python blocks are detected by indentations or by `# %%`/`# In[]` decorators.
+- Markdown fenced code of [Markdown Extended](https://github.com/jonschlinkert/sublime-markdown-extended) and [R Markdown](https://github.com/randy3k/R-Box) is also supported.
