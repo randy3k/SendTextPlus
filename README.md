@@ -1,4 +1,4 @@
-# SendText+ for Sublime Text
+# SendTextPlus for Sublime Text
 
 This package improves [SendText](https://github.com/wch/SendText), particularly for `r`, `python` and `julia` syntaxes (Note: [IPython](https://ipython.org) is assumed for python codes.). It supports
 
