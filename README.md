@@ -32,7 +32,7 @@ Via Package Control.
 
 ### Platform and syntax specific settings.
 
-You can use different settings for different platforms and syntaxes by editing the default settings at `Preferences` -> `Package Settings` -> `SendText+`. It understands platform and syntax specifications. The list of supported programs are
+You can use different settings for different platforms and syntaxes by editing the default settings at `Preferences` -> `Package Settings` -> `SendTextPlus`. It understands platform and syntax specifications. The list of supported programs are
 
 - Mac: Terminal, iTerm, R, RStudio, Chrome-RStudio, Chrome-Jupyter, Safari-RStudio, Safari-Jupyter
 - Liniux: gnome-terminal, tmux, screen, RStudio
