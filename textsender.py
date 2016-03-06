@@ -2,6 +2,7 @@ import sublime
 import os
 import re
 import subprocess
+import threading
 
 
 def sget(key, default=None):
@@ -28,6 +29,7 @@ def get_program(view):
 
 class TextSender:
     cb = None
+    thread = None
 
     def __init__(self, view, prog=None):
         self.view = view
@@ -58,8 +60,10 @@ class TextSender:
 
     @classmethod
     def set_clipboard(cls, cmd):
-        if not cls.cb:
+        if not cls.thread:
             cls.cb = sublime.get_clipboard()
+        else:
+            cls.thread.cancel()
         sublime.set_clipboard(cmd)
 
     @classmethod
@@ -68,7 +72,8 @@ class TextSender:
             if cls.cb:
                 sublime.set_clipboard(cls.cb)
             cls.cb = None
-        sublime.set_timeout(_reset_clipboard, 2000)
+        cls.thread = threading.Timer(0.5, _reset_clipboard)
+        cls.thread.start()
 
     def _dispatch_terminal(self, cmd):
         cmd = self.clean_cmd(cmd)
