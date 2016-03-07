@@ -5,11 +5,11 @@ import shutil
 
 def update_resources(binname):
     # from https://github.com/weslly/ColorPicker/blob/master/sublimecp.py
-    targetdir = os.path.join(sublime.packages_path(), 'User', 'SendText+', 'bin')
+    targetdir = os.path.join(sublime.packages_path(), 'User', 'SendTextPlus', 'bin')
     targetpath = os.path.join(targetdir, binname)
-    respath = 'Packages/SendText+/bin/' + binname
-    pkgpath = os.path.join(sublime.installed_packages_path(), 'SendText+.sublime-package')
-    unpkgpath = os.path.join(sublime.packages_path(), 'SendText+', 'bin', binname)
+    respath = 'Packages/SendTextPlus/bin/' + binname
+    pkgpath = os.path.join(sublime.installed_packages_path(), 'SendTextPlus.sublime-package')
+    unpkgpath = os.path.join(sublime.packages_path(), 'SendTextPlus', 'bin', binname)
 
     if os.path.exists(targetpath):
         targetinfo = os.stat(targetpath)

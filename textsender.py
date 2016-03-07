@@ -271,9 +271,9 @@ class TextSender:
     @staticmethod
     def execute_ahk_script(script, args=[]):
         ahk_path = os.path.join(sublime.packages_path(),
-                                'User', 'SendText+', 'bin', 'AutoHotkeyU32')
+                                'User', 'SendTextPlus', 'bin', 'AutoHotkeyU32')
         ahk_script_path = os.path.join(sublime.packages_path(),
-                                       'User', 'SendText+', 'bin', script)
+                                       'User', 'SendTextPlus', 'bin', script)
         subprocess.check_output([ahk_path, ahk_script_path] + args)
 
     def _dispatch_cygwin(self, cmd):
