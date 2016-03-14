@@ -71,7 +71,7 @@ class SendTextPlusCommand(sublime_plugin.TextCommand):
                 getter = PythonTextGetter(view)
             elif view.score_selector(pt, "source.julia"):
                 getter = JuliaTextGetter(view)
-            elif view.score_selector(pt, "text.html.markdown"):
+            elif view.score_selector(pt, "punctuation.definition.fenced.markdown"):
                 getter = MarkDownTextGetter(view)
             else:
                 getter = TextGetter(view)
