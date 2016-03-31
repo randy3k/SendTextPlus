@@ -12,8 +12,14 @@ class TextGetter:
     def __init__(self, view):
         self.view = view
 
+    def expand_cursor(self, s):
+        s = self.view.line(s)
+        if sget("auto_expand_line", True):
+            s = self.expand_line(s)
+        return s
+
     def expand_line(self, s):
-        return self.view.line(s)
+        return s
 
     def advance(self, s):
         view = self.view
@@ -31,7 +37,7 @@ class TextGetter:
         moved = False
         for s in [s for s in view.sel()]:
             if s.empty():
-                s = self.expand_line(s)
+                s = self.expand_cursor(s)
                 if sget("auto_advance", True):
                     self.advance(s)
                     moved = True
@@ -48,8 +54,6 @@ class RTextGetter(TextGetter):
 
     def expand_line(self, s):
         view = self.view
-        # expand selection to {...}
-        s = view.line(s)
         thiscmd = view.substr(s)
         if re.match(r".*\{\s*$", thiscmd):
             es = view.find(
@@ -65,7 +69,6 @@ class PythonTextGetter(TextGetter):
 
     def expand_line(self, s):
         view = self.view
-        s = view.line(s)
         thiscmd = view.substr(s)
         row = view.rowcol(s.begin())[0]
         prevline = view.line(s.begin())
@@ -104,7 +107,6 @@ class JuliaTextGetter(TextGetter):
 
     def expand_line(self, s):
         view = self.view
-        s = view.line(s)
         thiscmd = view.substr(s)
         if (re.match(r"^\s*(?:function|if|for|while)", thiscmd) and
                 not re.match(r".*end\s*$", thiscmd)) or \
@@ -130,7 +132,6 @@ class MarkDownTextGetter(TextGetter):
 
     def expand_line(self, s):
         view = self.view
-        s = view.line(s)
         thisline = view.substr(s)
         if re.match(r"^```", thisline):
             end = view.find("^```$", s.end())

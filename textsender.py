@@ -48,7 +48,7 @@ class TextSender:
     def clean_cmd(cmd):
         cmd = cmd.expandtabs(4)
         cmd = cmd.rstrip('\n')
-        if len(re.findall("\n", cmd)) == 0:
+        if sget("remove_line_indentation", True) and len(re.findall("\n", cmd)) == 0:
             cmd = cmd.lstrip()
         return cmd
 

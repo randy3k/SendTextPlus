@@ -1,18 +1,4 @@
 {
-    // path to tmux and screen (linux/mac)
-    // "tmux" : "tmux",
-    // "screen" : "screen",
-
-    // path to Rgui.exe (for windows only)
-    // "R32" : "C:\\Program Files\\R\\R-3.1.0\\bin\\i386\\Rgui.exe",
-    // "R64" : "C:\\Program Files\\R\\R-3.1.0\\bin\\x64\\Rgui.exe",
-
-    // auto advance to the next line.
-    "auto_advance" : true,
-
-    // auto advance to the next non-empty line. Override to false if "auto_advance" is false.
-    "auto_advance_non_empty": false,
-
     // prog could be Terminal, iTerm, Cmder, Cygwin, tmux, screen,
     // SublimeREPL; It could also be RStudio, Chrome-RStudio, Chrome-Jupyter,
     // Safari-RStudio, Safari-Jupyter.
@@ -33,6 +19,26 @@
         }
     ],
 
-    // enable or disable SendText+ keybinds
+    // path to tmux and screen (linux/mac)
+    // "tmux" : "tmux",
+    // "screen" : "screen",
+
+    // path to Rgui.exe (for windows only)
+    // "R32" : "C:\\Program Files\\R\\R-3.1.0\\bin\\i386\\Rgui.exe",
+    // "R64" : "C:\\Program Files\\R\\R-3.1.0\\bin\\x64\\Rgui.exe",
+
+    // auto expand current line to block if selection is empty
+    "auto_expand_line" : true,
+
+    // remove indentation of single line
+    "remove_line_indentation" : true,
+
+    // auto advance to the next line.
+    "auto_advance" : true,
+
+    // auto advance to the next non-empty line. Override to false if "auto_advance" is false.
+    "auto_advance_non_empty": false,
+
+    // enable or disable all SendTextPlus keybinds
     "send_text_plus_keybinds": true
 }
