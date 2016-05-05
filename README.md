@@ -4,11 +4,8 @@ This package improves [SendText](https://github.com/wch/SendText), particularly 
 
 - Mac: Terminal, iTerm, RStudio, R GUI, and Jupyter running on Chrome and Safari
 - Linux: gnome-terminal, screen, tmux and RStudio. `xdotool` is required for gnome-terminal and RStudio, it can be installed via `apt-get install xdotool`. As gnome-terminal doesn't accept keystrokes while it is not in focus, we need to switch focus temporarily to gnome-terminal in order to send the code.
-- Windows: Cmder (see below to configure Cmder), Cygwin, R32, R64 and RStudio. Due to a strange behavior of RStudio, it doesn't accept the `ctrl-enter` key when there is no source file, so make sure there is at least one (possibly untitled) source file opened.
-- SublimeREPL for R and python syntaxes (it works better with R)
-
-Terminal is the default for Mac, Cmder for Windows and tmux for Linux. Use the command `SendText+: Choose Program` in command palette to quickly change the active program.
-
+- Windows: Cmder (see below to configure Cmder), Cygwin, R32, R64 and RStudio. Due to an issue of RStudio (see [RStudio](https://support.rstudio.com/hc/en-us/community/posts/208160308-ctrl-enter-doesn-t-work-in-R-console-without-a-source-file-opened-) and [this](https://github.com/rstudio/rstudio/commit/52f87a8ebec89a8ee7fcfe0b138cc7c13b72d488)), it doesn't accept the `ctrl-enter` key when there is no file opened, so make sure there is at least one (possibly untitled) source file opened.
+- SublimeREPL for R and python syntaxes (will be deprecated soon)
 
 
 ### Installation
@@ -16,6 +13,9 @@ Terminal is the default for Mac, Cmder for Windows and tmux for Linux. Use the c
 Via Package Control.
 
 ### Usage
+
+Use the command `SendText+: Choose Program` in command palette to quickly change the active program.
+Terminal is the default for Mac, Cmder for Windows and tmux for Linux. 
 
 - <kbd>cmd</kbd>+<kbd>enter</kbd> (Mac) or <kbd>ctrl</kbd>+<kbd>enter</kbd> (Windows/Linux)
 
