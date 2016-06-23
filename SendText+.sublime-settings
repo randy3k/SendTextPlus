@@ -40,5 +40,9 @@
     "auto_advance_non_empty": false,
 
     // enable or disable all SendTextPlus keybinds
-    "send_text_plus_keybinds": true
+    "send_text_plus_keybinds": true,
+
+    // enable bracketed_paste_mode
+    // currently only support terminal and iterm of mac os
+    "bracketed_paste_mode": false
 }

@@ -80,9 +80,13 @@ class TextSender:
     def _dispatch_terminal(self, cmd):
         cmd = self.clean_cmd(cmd)
         cmd = self.escape_dquote(cmd)
+        if sget("bracketed_paste_mode", False):
+            cmd = '(ASCII character 27) & "[200~' + cmd + '" & (ASCII character 27) & "[201~"'
+        else:
+            cmd = '"' + cmd + '"'
         args = ['osascript']
         args.extend(['-e',
-                     'tell application "Terminal" to do script "' + cmd + '" in front window'])
+                     'tell application "Terminal" to do script ' + cmd + ' in front window'])
         subprocess.Popen(args)
 
     @staticmethod
@@ -93,27 +97,22 @@ class TextSender:
 
     def _dispatch_iterm(self, cmd):
         cmd = self.clean_cmd(cmd)
+        cmd = self.escape_dquote(cmd)
+        if sget("bracketed_paste_mode", False):
+            cmd = '(ASCII character 27) & "[200~' + cmd + '" & (ASCII character 27) & "[201~"'
+        else:
+            cmd = '"' + cmd + '"'
         if self.iterm_version() >= (2, 9):
-            n = 1000
-            chunks = [cmd[i:i+n] for i in range(0, len(cmd), n)]
-            for chunk in chunks:
-                subprocess.call([
-                    'osascript', '-e',
-                    'tell application "iTerm" to tell the current window ' +
-                    'to tell current session to write text "' +
-                    self.escape_dquote(chunk) + '" without newline'
-                ])
             subprocess.call([
                 'osascript', '-e',
                 'tell application "iTerm" to tell the current window ' +
-                'to tell current session to write text ""'
+                'to tell current session to write text ' + cmd
             ])
         else:
             subprocess.call([
                 'osascript', '-e',
                 'tell application "iTerm" to tell the current terminal ' +
-                'to tell current session to write text "' +
-                self.escape_dquote(cmd) + '"'
+                'to tell current session to write text ' + cmd
             ])
 
     def _dispatch_r_osx(self, cmd):
