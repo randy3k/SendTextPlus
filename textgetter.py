@@ -1,20 +1,17 @@
 import sublime
 import re
-
-
-def sget(key, default=None):
-    s = sublime.load_settings("SendText+.sublime-settings")
-    return s.get(key, default)
+from .settings import SettingManager
 
 
 class TextGetter:
 
     def __init__(self, view):
         self.view = view
+        self.sget = SettingManager(view).get
 
     def expand_cursor(self, s):
         s = self.view.line(s)
-        if sget("auto_expand_line", True):
+        if self.sget("auto_expand_line", True):
             s = self.expand_line(s)
         return s
 
@@ -25,7 +22,7 @@ class TextGetter:
         view = self.view
         view.sel().subtract(s)
         pt = view.text_point(view.rowcol(s.end())[0]+1, 0)
-        if sget("auto_advance_non_empty", False):
+        if self.sget("auto_advance_non_empty", False):
             nextpt = view.find(r"\S", pt)
             if nextpt.begin() != -1:
                 pt = view.text_point(view.rowcol(nextpt.begin())[0], 0)
@@ -38,7 +35,7 @@ class TextGetter:
         for s in [s for s in view.sel()]:
             if s.empty():
                 s = self.expand_cursor(s)
-                if sget("auto_advance", True):
+                if self.sget("auto_advance", True):
                     self.advance(s)
                     moved = True
 
@@ -124,7 +121,7 @@ class MarkDownTextGetter(TextGetter):
         view = self.view
         view.sel().subtract(view.line(s.begin()-1))
         pt = view.text_point(view.rowcol(s.end())[0]+2, 0)
-        if sget("auto_advance_non_empty", False):
+        if self.sget("auto_advance_non_empty", False):
             nextpt = view.find(r"\S", pt)
             if nextpt.begin() != -1:
                 pt = view.text_point(view.rowcol(nextpt.begin())[0], 0)

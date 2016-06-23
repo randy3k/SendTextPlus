@@ -6,6 +6,23 @@ import shutil
 PKGNAME = 'SendTextPlus'
 
 
+def update_settings():
+    old_file = os.path.join(sublime.packages_path(), "User", "SendText+.sublime-settings")
+    if os.path.exists(old_file):
+        old = sublime.load_settings("SendText+.sublime-settings")
+        new = sublime.load_settings("SendTextPlus.sublime-settings")
+        for k in ["prog", "tmux", "screen", "R32", "R64", "auto_expand_line",
+                  "remove_line_indentation", "auto_advance", "auto_advance_non_empty"]:
+            if old.has(k) and not new.has(k):
+                new.set(k, old.get(k))
+        if new.get("defaults") != old.get("defaults"):
+            if old.get("defaults"):
+                new.set("user", old.get("defaults"))
+                old.erase("defaults")
+        os.unlink(old_file)
+        sublime.save_settings("SendTextPlus.sublime-settings")
+
+
 def update_resources(*target):
     targetpath = os.path.join(sublime.packages_path(), 'User', PKGNAME, *target)
     targetdir = os.path.dirname(targetpath)
@@ -48,3 +65,5 @@ def plugin_loaded():
         update_resources("bin", "Cygwin.ahk")
         update_resources("bin", "RStudio.ahk")
         update_resources("bin", "Rgui.ahk")
+
+    update_settings()

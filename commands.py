@@ -6,7 +6,7 @@ from .textgetter import TextGetter, \
     PythonTextGetter, \
     JuliaTextGetter, \
     MarkDownTextGetter
-from .textsender import TextSender, PythonTextSender
+from .textsender import TextSender
 
 
 class SendTextPlusBuild(sublime_plugin.WindowCommand):
@@ -77,10 +77,7 @@ class SendTextPlusCommand(sublime_plugin.TextCommand):
                 getter = TextGetter(view)
             cmd = getter.get_text()
 
-        if view.score_selector(pt, "source.python"):
-            sender = PythonTextSender(view, prog)
-        else:
-            sender = TextSender(view, prog)
+        sender = TextSender(view, prog)
         sender.send_text(cmd)
 
 

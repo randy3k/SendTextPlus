@@ -1,0 +1,51 @@
+{
+
+    "defaults" : [
+        {
+            "platform": "osx",
+
+            "prog": "Terminal"
+
+            // "scopes": ["source"],
+
+            // auto expand current line to block if selection is empty
+            // "auto_expand_line" : true,
+
+            // remove indentation of single line
+            // "remove_line_indentation" : true,
+
+            // auto advance to the next line.
+            // "auto_advance" : true,
+
+            // auto advance to the next non-empty line. Override to false if "auto_advance" is false.
+            // "auto_advance_non_empty": false,
+
+            // enable bracketed_paste_mode
+            // currently, only should be enabled for julia running on terminal and iterm of mac os
+            // "bracketed_paste_mode": false
+        },
+        {
+            "platform": "windows",
+
+            "prog": "Cmder"
+
+            // the settings for osx are also applied here
+        },
+        {
+            "platform": "linux",
+
+            "prog": "tmux"
+
+            // the settings for osx are also applied here
+        }
+    ],
+
+    // path to tmux and screen (linux/mac)
+    // "tmux" : "tmux"
+    // "screen" : "screen"
+
+    // path to Rgui.exe (for windows only)
+    // "R32" : "C:\\Program Files\\R\\R-3.1.0\\bin\\i386\\Rgui.exe"
+    // "R64" : "C:\\Program Files\\R\\R-3.1.0\\bin\\x64\\Rgui.exe"
+
+}

@@ -3,28 +3,7 @@ import os
 import re
 import subprocess
 import threading
-
-
-def sget(key, default=None):
-    s = sublime.load_settings("SendText+.sublime-settings")
-    return s.get(key, default)
-
-
-def get_program(view):
-    plat = sublime.platform()
-    prog = sget("prog")
-    if prog:
-        return prog
-    defaults = sget("defaults")
-    pt = view.sel()[0].begin() if len(view.sel()) > 0 else 0
-
-    for d in defaults:
-        match_platform = plat == d.get("platform", plat)
-        scopes = d.get("scopes", None)
-        match_scopes = not scopes or any([view.score_selector(pt, s) > 0 for s in scopes])
-        if match_platform and match_scopes and "prog" in d:
-            return d.get("prog")
-    return None
+from .settings import SettingManager
 
 
 class TextSender:
@@ -33,22 +12,33 @@ class TextSender:
 
     def __init__(self, view, prog=None):
         self.view = view
-        if not prog:
-            prog = get_program(view)
+        self.sget = SettingManager(view).get
         plat = sublime.platform()
+        if not prog:
+            prog = self.sget("prog")
         function_str = "_dispatch_" + prog.lower().replace("-", "_")
         if getattr(self, function_str + "_" + plat, None):
             function_str = function_str + "_" + plat
         self._send_text = eval("self." + function_str)
 
+    def is_python(self):
+        pt = self.view.sel()[0].begin() if len(self.view.sel()) > 0 else 0
+        return self.view.score_selector(pt, "source.python") > 0
+
+    def wrap_paste_magic_for_python(self, cmd):
+        if self.is_python():
+            cmd = cmd.rstrip("\n")
+            if len(re.findall("\n", cmd)) > 0:
+                cmd = "%cpaste -q\n" + cmd + "\n--"
+        return cmd
+
     def send_text(self, cmd):
         self._send_text(cmd)
 
-    @staticmethod
-    def clean_cmd(cmd):
+    def clean_cmd(self, cmd):
         cmd = cmd.expandtabs(4)
         cmd = cmd.rstrip('\n')
-        if sget("remove_line_indentation", True) and len(re.findall("\n", cmd)) == 0:
+        if self.sget("remove_line_indentation", True) and len(re.findall("\n", cmd)) == 0:
             cmd = cmd.lstrip()
         return cmd
 
@@ -78,41 +68,61 @@ class TextSender:
         cls.thread.start()
 
     def _dispatch_terminal(self, cmd):
+        cmd = self.wrap_paste_magic_for_python(cmd)
         cmd = self.clean_cmd(cmd)
         cmd = self.escape_dquote(cmd)
-        if sget("bracketed_paste_mode", False):
-            cmd = '(ASCII character 27) & "[200~' + cmd + '" & (ASCII character 27) & "[201~"'
+        if self.sget("bracketed_paste_mode", False):
+            head = '(ASCII character 27) & "[200~'
+            tail = '" & (ASCII character 27) & "[201~"'
+            cmd = head + cmd + tail
         else:
             cmd = '"' + cmd + '"'
         args = ['osascript']
         args.extend(['-e',
                      'tell application "Terminal" to do script ' + cmd + ' in front window'])
-        subprocess.Popen(args)
+        subprocess.check_call(args)
 
     @staticmethod
     def iterm_version():
         args = ['osascript', '-e', 'tell application "iTerm" to get version']
-        ver = subprocess.check_output(args).decode().strip()
+        ver = subprocess.check_call(args).decode().strip()
         return tuple((int(i) for i in re.split(r"\.", ver)[0:2]))
 
     def _dispatch_iterm(self, cmd):
+        cmd = self.wrap_paste_magic_for_python(cmd)
         cmd = self.clean_cmd(cmd)
-        cmd = self.escape_dquote(cmd)
-        if sget("bracketed_paste_mode", False):
-            cmd = '(ASCII character 27) & "[200~' + cmd + '" & (ASCII character 27) & "[201~"'
-        else:
-            cmd = '"' + cmd + '"'
-        if self.iterm_version() >= (2, 9):
-            subprocess.call([
+        bpm = self.sget("bracketed_paste_mode", False)
+        if bpm:
+            cmd = self.escape_dquote(cmd)
+            head = '(ASCII character 27) & "[200~'
+            tail = '" & (ASCII character 27) & "[201~"'
+            cmd = head + cmd + tail
+            subprocess.check_call([
                 'osascript', '-e',
                 'tell application "iTerm" to tell the current window ' +
-                'to tell current session to write text ' + cmd
+                'to tell current session to write text '
+            ])
+        elif self.iterm_version() >= (2, 9):
+            n = 1000
+            chunks = [cmd[i:i+n] for i in range(0, len(cmd), n)]
+            for chunk in chunks:
+                subprocess.check_call([
+                    'osascript', '-e',
+                    'tell application "iTerm" to tell the current window ' +
+                    'to tell current session to write text "' +
+                    self.escape_dquote(chunk) + '" without newline'
+                ])
+            subprocess.check_call([
+                'osascript', '-e',
+                'tell application "iTerm" to tell the current window ' +
+                'to tell current session to write text ""'
             ])
         else:
-            subprocess.call([
+            subprocess.check_call([
                 'osascript', '-e',
                 'tell application "iTerm" to tell the current terminal ' +
-                'to tell current session to write text ' + cmd
+                'to tell current session to write text "' +
+                self.escape_dquote(cmd) + '"'
             ])
 
     def _dispatch_r_osx(self, cmd):
@@ -120,7 +130,7 @@ class TextSender:
         cmd = self.escape_dquote(cmd)
         args = ['osascript']
         args.extend(['-e', 'tell application "R" to cmd "' + cmd + '"'])
-        subprocess.Popen(args)
+        subprocess.check_call(args)
 
     def _dispatch_rstudio_osx(self, cmd):
         cmd = self.clean_cmd(cmd)
@@ -131,7 +141,7 @@ class TextSender:
             end tell
         end run
         """
-        subprocess.call(['osascript', '-e', script, cmd])
+        subprocess.check_call(['osascript', '-e', script, cmd])
 
     def _dispatch_chrome_rstudio(self, cmd):
         cmd = self.clean_cmd(cmd)
@@ -155,7 +165,7 @@ class TextSender:
             end tell
         end run
         """
-        subprocess.call(['osascript', '-e', script, cmd])
+        subprocess.check_call(['osascript', '-e', script, cmd])
 
     def _dispatch_safari_rstudio(self, cmd):
         cmd = self.clean_cmd(cmd)
@@ -179,7 +189,7 @@ class TextSender:
             end tell
         end run
         """
-        subprocess.call(['osascript', '-e', script, cmd])
+        subprocess.check_call(['osascript', '-e', script, cmd])
 
     def _dispatch_chrome_jupyter(self, cmd):
         cmd = self.clean_cmd(cmd)
@@ -199,7 +209,7 @@ class TextSender:
             end tell
         end run
         """
-        subprocess.call(['osascript', '-e', script, cmd])
+        subprocess.check_call(['osascript', '-e', script, cmd])
 
     def _dispatch_safari_jupyter(self, cmd):
         cmd = self.clean_cmd(cmd)
@@ -219,19 +229,21 @@ class TextSender:
             end tell
         end run
         """
-        subprocess.call(['osascript', '-e', script, cmd])
+        subprocess.check_call(['osascript', '-e', script, cmd])
 
     def _dispatch_tmux(self, cmd):
-        tmux = sget("tmux", "tmux")
+        cmd = self.wrap_paste_magic_for_python(cmd)
+        tmux = self.sget("tmux", "tmux")
         cmd = self.clean_cmd(cmd) + "\n"
         n = 200
         chunks = [cmd[i:i+n] for i in range(0, len(cmd), n)]
         for chunk in chunks:
-            subprocess.call([tmux, 'set-buffer', chunk])
-            subprocess.call([tmux, 'paste-buffer', '-d'])
+            subprocess.check_call([tmux, 'set-buffer', chunk])
+            subprocess.check_call([tmux, 'paste-buffer', '-d'])
 
     def _dispatch_screen(self, cmd):
-        screen = sget("screen", "screen")
+        cmd = self.wrap_paste_magic_for_python(cmd)
+        screen = self.sget("screen", "screen")
         plat = sublime.platform()
         cmd = self.clean_cmd(cmd) + "\n"
         n = 200
@@ -240,30 +252,31 @@ class TextSender:
             if plat == "linux":
                 chunk = chunk.replace("\\", r"\\")
                 chunk = chunk.replace("$", r"\$")
-            subprocess.call([screen, '-X', 'stuff', chunk])
+            subprocess.check_call([screen, '-X', 'stuff', chunk])
 
     def _dispatch_gnome_terminal(self, cmd):
-        wid = subprocess.check_output(["xdotool", "search", "--onlyvisible",
+        cmd = self.wrap_paste_magic_for_python(cmd)
+        wid = subprocess.check_call(["xdotool", "search", "--onlyvisible",
                                        "--class", "gnome-terminal"])
-        sid = subprocess.check_output(["xdotool", "getactivewindow"]).decode("utf-8").strip()
+        sid = subprocess.check_call(["xdotool", "getactivewindow"]).decode("utf-8").strip()
         if wid:
             wid = wid.decode("utf-8").strip().split("\n")[-1]
             cmd = self.clean_cmd(cmd) + "\n"
             self.set_clipboard(cmd)
-            subprocess.check_output(["xdotool", "windowfocus", wid])
-            subprocess.check_output(["xdotool", "key", "--clearmodifiers", "ctrl+shift+v"])
-            subprocess.check_output(["xdotool", "windowfocus", sid])
+            subprocess.check_call(["xdotool", "windowfocus", wid])
+            subprocess.check_call(["xdotool", "key", "--clearmodifiers", "ctrl+shift+v"])
+            subprocess.check_call(["xdotool", "windowfocus", sid])
             self.reset_clipboard()
 
     def _dispatch_rstudio_linux(self, cmd):
-        wid = subprocess.check_output(["xdotool", "search", "--onlyvisible", "--class", "rstudio"])
+        wid = subprocess.check_call(["xdotool", "search", "--onlyvisible", "--class", "rstudio"])
         if wid:
             wid = wid.decode("utf-8").strip().split("\n")[-1]
             cmd = self.clean_cmd(cmd)
             self.set_clipboard(cmd)
-            subprocess.check_output(["xdotool", "key", "--window", wid,
+            subprocess.check_call(["xdotool", "key", "--window", wid,
                                      "--clearmodifiers", "ctrl+v"])
-            subprocess.check_output(["xdotool", "key", "--window", wid,
+            subprocess.check_call(["xdotool", "key", "--window", wid,
                                      "--clearmodifiers", "Return"])
             self.reset_clipboard()
 
@@ -273,15 +286,17 @@ class TextSender:
                                 'User', 'SendTextPlus', 'bin', 'AutoHotkeyU32')
         ahk_script_path = os.path.join(sublime.packages_path(),
                                        'User', 'SendTextPlus', 'bin', script)
-        subprocess.check_output([ahk_path, ahk_script_path] + args)
+        subprocess.check_call([ahk_path, ahk_script_path] + args)
 
     def _dispatch_cygwin(self, cmd):
+        cmd = self.wrap_paste_magic_for_python(cmd)
         cmd = self.clean_cmd(cmd) + "\n"
         self.set_clipboard(cmd)
         self.execute_ahk_script("Cygwin.ahk")
         self.reset_clipboard()
 
     def _dispatch_cmder(self, cmd):
+        cmd = self.wrap_paste_magic_for_python(cmd)
         cmd = self.clean_cmd(cmd) + "\n"
         self.set_clipboard(cmd)
         self.execute_ahk_script("Cmder.ahk")
@@ -290,13 +305,13 @@ class TextSender:
     def _dispatch_r32_windows(self, cmd):
         cmd = self.clean_cmd(cmd) + "\n"
         self.set_clipboard(cmd)
-        self.execute_ahk_script("Rgui.ahk", [sget("R32", "0")])
+        self.execute_ahk_script("Rgui.ahk", [self.sget("R32", "0")])
         self.reset_clipboard()
 
     def _dispatch_r64_windows(self, cmd):
         cmd = self.clean_cmd(cmd) + "\n"
         self.set_clipboard(cmd)
-        self.execute_ahk_script("Rgui.ahk", [sget("R64", "1")])
+        self.execute_ahk_script("Rgui.ahk", [self.sget("R64", "1")])
         self.reset_clipboard()
 
     def _dispatch_rstudio_windows(self, cmd):
@@ -313,16 +328,3 @@ class TextSender:
         external_id = view.scope_name(0).split(" ")[0].split(".", 1)[1]
         window.run_command(
             "repl_send", {"external_id": external_id, "text": cmd})
-
-
-class PythonTextSender(TextSender):
-
-    def send_text(self, cmd):
-        if self._send_text != self._dispatch_chrome_jupyter and \
-                self._send_text != self._dispatch_safari_jupyter:
-
-            cmd = cmd.rstrip("\n")
-            if len(re.findall("\n", cmd)) > 0:
-                cmd = "%cpaste -q\n" + cmd + "\n--"
-
-        TextSender.send_text(self, cmd)

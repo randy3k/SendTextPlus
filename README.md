@@ -2,10 +2,9 @@
 
 This package improves [SendText](https://github.com/wch/SendText), particularly for `r`, `python` and `julia` syntaxes (Note: [IPython](https://ipython.org) is assumed for python codes.). It supports
 
-- Mac: Terminal, iTerm, RStudio, R GUI, and Jupyter running on Chrome and Safari
+- Mac: Terminal, iTerm (>=2.9), RStudio, R GUI, and Jupyter running on Chrome and Safari
 - Linux: gnome-terminal, screen, tmux and RStudio. `xdotool` is required for gnome-terminal and RStudio, it can be installed via `apt-get install xdotool`. As gnome-terminal doesn't accept keystrokes while it is not in focus, we need to switch focus temporarily to gnome-terminal in order to send the code.
 - Windows: Cmder (see below to configure Cmder), Cygwin, R32, R64 and RStudio. Due to an issue of RStudio (see [RStudio](https://support.rstudio.com/hc/en-us/community/posts/208160308-ctrl-enter-doesn-t-work-in-R-console-without-a-source-file-opened-) and [this](https://github.com/rstudio/rstudio/commit/52f87a8ebec89a8ee7fcfe0b138cc7c13b72d488)), it doesn't accept the `ctrl-enter` key when there is no file opened, so make sure there is at least one (possibly untitled) source file opened.
-- SublimeREPL for R and python syntaxes (will be deprecated soon)
 
 
 ### Installation
@@ -39,32 +38,29 @@ You can use different settings for different platforms and syntaxes by editing t
 - Windows: Cmder, Cygwin, R64, R32, RStudio
 - or SublimeREPL
 
-An example:
+Order matters, SendTextPlus will pick the first match out of the list.
+
+For example:
 
 ```json
 {
-    "defaults" : [
+    "user" : [
         {
             "platform": "osx",
             "scopes": ["source.r"],
-            "prog": "RStudio"
+            "prog": "RStudio",
         },
         {
             "platform": "osx",
-            "scopes": ["source.python", "source.julia"],
-            "prog": "Chrome-Jupyter"
+            "scopes": ["source.python"],
+            "prog": "Chrome-Jupyter",
+            "remove_line_indentation": false
         },
         {
             "platform": "osx",
-            "prog": "Terminal"
-        },
-        {
-            "platform": "windows",
-            "prog": "Cmder"
-        },
-        {
-            "platform": "linux",
-            "prog": "tmux"
+            "scopes": ["source.julia"],
+            "prog": "Terminal",
+            "bracketed_paste_mode": false
         }
     ]
 }
