@@ -85,7 +85,7 @@ class TextSender:
     @staticmethod
     def iterm_version():
         args = ['osascript', '-e', 'tell application "iTerm" to get version']
-        ver = subprocess.check_call(args).decode().strip()
+        ver = subprocess.check_output(args).decode().strip()
         return tuple((int(i) for i in re.split(r"\.", ver)[0:2]))
 
     def _dispatch_iterm(self, cmd):
@@ -256,9 +256,9 @@ class TextSender:
 
     def _dispatch_gnome_terminal(self, cmd):
         cmd = self.wrap_paste_magic_for_python(cmd)
-        wid = subprocess.check_call(["xdotool", "search", "--onlyvisible",
+        sid = subprocess.check_output(["xdotool", "getactivewindow"]).decode("utf-8").strip()
+        wid = subprocess.check_output(["xdotool", "search", "--onlyvisible",
                                        "--class", "gnome-terminal"])
-        sid = subprocess.check_call(["xdotool", "getactivewindow"]).decode("utf-8").strip()
         if wid:
             wid = wid.decode("utf-8").strip().split("\n")[-1]
             cmd = self.clean_cmd(cmd) + "\n"
@@ -269,7 +269,7 @@ class TextSender:
             self.reset_clipboard()
 
     def _dispatch_rstudio_linux(self, cmd):
-        wid = subprocess.check_call(["xdotool", "search", "--onlyvisible", "--class", "rstudio"])
+        wid = subprocess.check_output(["xdotool", "search", "--onlyvisible", "--class", "rstudio"])
         if wid:
             wid = wid.decode("utf-8").strip().split("\n")[-1]
             cmd = self.clean_cmd(cmd)
