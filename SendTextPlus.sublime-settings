@@ -1,4 +1,7 @@
 {
+    "user" : [
+        // define your own settings here, check readme for an example.
+    ],
 
     "defaults" : [
         {
