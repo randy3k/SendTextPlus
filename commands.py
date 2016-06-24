@@ -89,15 +89,15 @@ class SendTextPlusChooseProgramCommand(sublime_plugin.WindowCommand):
     def run(self):
         plat = sublime.platform()
         if plat == 'osx':
-            self.app_list = ["[Defaults]", "Terminal", "iTerm",
+            self.app_list = ["[User]", "Terminal", "iTerm",
                              "R", "RStudio", "Chrome-RStudio", "Chrome-Jupyter",
                              "Safari-RStudio", "Safari-Jupyter",
                              "tmux", "screen", "SublimeREPL"]
         elif plat == "windows":
-            self.app_list = ["[Defaults]", "Cmder", "Cygwin",
+            self.app_list = ["[User]", "Cmder", "Cygwin",
                              "R32", "R64", "RStudio", "SublimeREPL"]
         elif plat == "linux":
-            self.app_list = ["[Defaults]", "gnome-terminal", "tmux", "screen",
+            self.app_list = ["[User]", "gnome-terminal", "tmux", "screen",
                              "RStudio", "SublimeREPL"]
         else:
             sublime.error_message("Platform not supported!")

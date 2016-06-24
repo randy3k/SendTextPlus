@@ -65,7 +65,7 @@ For example:
     ]
 }
 ```
-Make sure [Defaults] is selected in `SendText+: Choose Program`.
+Make sure [User] is selected in `SendText+: Choose Program`.
 
 ### Custom Keybind
 
