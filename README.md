@@ -1,5 +1,12 @@
 # SendTextPlus for Sublime Text
 
+----
+### *Note*
+
+SendTestPlus will be deprecated soon in favour of [SendREPL](https://github.com/randy3k/SendREPL).
+
+----
+
 This package improves [SendText](https://github.com/wch/SendText), particularly for `r`, `python` and `julia` syntaxes (Note: [IPython](https://ipython.org) is assumed for python codes.). It supports
 
 - Mac: Terminal, iTerm (>=2.9), RStudio, R GUI, and Jupyter running on Chrome and Safari
